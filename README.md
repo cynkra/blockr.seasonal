@@ -21,21 +21,40 @@ library(blockr.core)
 library(blockr.seasonal)
 library(blockr.ts)
 
+
 # Create a seasonal adjustment dashboard
-stack <- new_stack(
-  # Load time series data
-  blockr.ts::new_ts_data_block(dataset = "AirPassengers"),
-
-  # Perform seasonal adjustment (outputs model object)
-  new_seas_block(seas_call = "seas(x = x, x11 = list())"),
-
-  # Visualize results
-  new_final_block(),        # Original vs adjusted
-  new_monthplot_block()     # Seasonal patterns
+board <- new_board(
+  blocks = c(
+    data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
+    seas = new_seas_block(seas_call = "seas(x = x, x11 = list())")
+  ),
+  links = c(
+    new_link("data", "seas")
+  )
 )
 
 # Serve the dashboard
-serve_stack(stack)
+serve(board)
+
+
+
+# Create a seasonal adjustment dashboard
+board <- new_board(
+  blocks = c(
+    data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
+    seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
+    final = new_final_block(),
+    month = new_monthplot_block()
+  ),
+  links = c(
+    new_link("data", "seas"),
+    new_link("seas", "final"),
+    new_link("seas", "month")
+  )
+)
+
+# Serve the dashboard
+serve(board)
 ```
 
 ## Key Innovation: Model-as-Output Pattern
@@ -135,78 +154,93 @@ library(blockr.core)
 library(blockr.seasonal)
 library(blockr.ts)
 
-# Standalone usage - single block
-serve_stack(
-  new_stack(
-    blockr.ts::new_ts_data_block(dataset = "AirPassengers"),
-    new_seas_block(seas_call = "seas(x = x, x11 = list())")
+# Standalone usage - with data source
+serve(
+  new_board(
+    blocks = c(
+      data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
+      seas = new_seas_block(seas_call = "seas(x = x, x11 = list())")
+    ),
+    links = c(
+      new_link("data", "seas")
+    )
   )
 )
 
-# Or with direct data (if supported by your blockr version)
-blockr.core::serve(
-  new_seas_block(seas_call = "seas(x = x, x11 = list())"),
-  data = list(x = tsbox::ts_tbl(datasets::AirPassengers))
-)
+
 ```
 
 ### Basic Seasonal Adjustment
 
 ```r
 # Simple X-11 adjustment
-stack <- new_stack(
-  blockr.ts::new_ts_data_block(dataset = "AirPassengers"),
-  new_seas_block(seas_call = "seas(x = x, x11 = list())"),
-  new_final_block()
+serve(
+  new_board(
+    blocks = c(
+      data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
+      seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
+      final = new_final_block()
+    ),
+    links = c(
+      new_link("data", "seas"),
+      new_link("seas", "final")
+    )
+  )
 )
-
-serve_stack(stack)
 ```
 
 ### Advanced Analysis with Multiple Views
 
 ```r
 # Complex adjustment with diagnostics
-stack <- new_stack(
-  # Data input
-  blockr.ts::new_ts_data_block(dataset = "AirPassengers"),
-
-  # Seasonal adjustment with custom specification
-  new_seas_block(
-    seas_call = "seas(x = x, x11 = list(mode = 'mult'))",
-    show_summary = TRUE
-  ),
-
-  # Multiple diagnostic views
-  new_final_block(),
-  new_monthplot_block(),
-  new_series_block(component = "trend"),
-  new_fivebestmdl_block(),
-  new_summary_block()
+serve(
+  new_board(
+    blocks = c(
+      data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
+      seas = new_seas_block(
+        seas_call = "seas(x = x, x11 = list(mode = 'mult'))",
+        show_summary = TRUE
+      ),
+      final = new_final_block(),
+      month = new_monthplot_block(),
+      trend = new_series_block(component = "trend"),
+      models = new_fivebestmdl_block()
+    ),
+    links = c(
+      new_link("data", "seas"),
+      new_link("seas", "final"),
+      new_link("seas", "month"),
+      new_link("seas", "trend"),
+      new_link("seas", "models")
+    )
+  )
 )
-
-serve_stack(stack)
 ```
 
 ### Interactive Model Exploration
 
 ```r
 # Real-time model specification editing
-stack <- new_stack(
-  blockr.ts::new_ts_data_block(dataset = "USAccDeaths"),
-
-  # Try different specifications interactively:
-  # "seas(x = x, x11 = list())"
-  # "seas(x = x, seats = list())"
-  # "seas(x = x, x11 = list(mode = 'mult'))"
-  # "seas(x = x, x11 = list(x11.mode = 'logadd'))"
-  new_seas_block(seas_call = "seas(x = x, seats = list())"),
-
-  new_final_block(),
-  new_monthplot_block()
+serve(
+  new_board(
+    blocks = c(
+      data = blockr.ts::new_ts_dataset_block(dataset = "USAccDeaths"),
+      # Try different specifications interactively:
+      # "seas(x = x, x11 = list())"
+      # "seas(x = x, seats = list())"
+      # "seas(x = x, x11 = list(mode = 'mult'))"
+      # "seas(x = x, x11 = list(x11.mode = 'logadd'))"
+      seas = new_seas_block(seas_call = "seas(x = x, seats = list())"),
+      final = new_final_block(),
+      month = new_monthplot_block()
+    ),
+    links = c(
+      new_link("data", "seas"),
+      new_link("seas", "final"),
+      new_link("seas", "month")
+    )
+  )
 )
-
-serve_stack(stack)
 ```
 
 ## Dependencies

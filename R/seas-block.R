@@ -5,57 +5,54 @@
 #' object rather than data, enabling downstream blocks to consume the model.
 #'
 #' @param seas_call String containing the complete seas() call (default: "seas(x = x, x11 = list())")
-#' @param show_summary Whether to display model summary in the block
 #' @param ... Additional arguments passed to new_transform_block
 #'
 #' @export
 new_seas_block <- function(
   seas_call = "seas(x = x, x11 = list())",
-  show_summary = TRUE,
   ...
 ) {
   blockr.core::new_transform_block(
-    function(id, x) {  # Named input x instead of generic data
+    server = function(id, x) {
+      # Named input x instead of generic data
       moduleServer(
         id,
         function(input, output, session) {
           # Initialize reactive values with r_ prefix
           r_seas_call <- reactiveVal(seas_call)
-          r_show_summary <- reactiveVal(show_summary)
-          
+
           # Track the model for summary display
           r_model <- reactiveVal(NULL)
-          
+
           # Input observers
           observeEvent(input$seas_call, {
             r_seas_call(input$seas_call)
           })
-          
-          observeEvent(input$show_summary, {
-            r_show_summary(input$show_summary)
-          })
-          
+
           # Summary output
           output$summary <- renderPrint({
-            if (r_show_summary() && !is.null(r_model())) {
-              tryCatch({
-                summary(r_model())
-              }, error = function(e) {
-                cat("Model not yet computed or error in model summary")
-              })
+            if (!is.null(r_model())) {
+              tryCatch(
+                {
+                  summary(r_model())
+                },
+                error = function(e) {
+                  cat("Model not yet computed or error in model summary")
+                }
+              )
             }
           })
-          
+
           list(
             expr = reactive({
               # Build expression using parse/glue pattern
               call_text <- r_seas_call()
-              
+
               # Auto-prefix seas with seasonal:: if not already present
               if (!grepl("seasonal::", call_text)) {
                 call_text <- gsub("seas\\(", "seasonal::seas(", call_text)
               }
-              
+
               # Pre-process x to ts format, then evaluate user's complete seas() call
               expr_text <- glue::glue(
                 "{{
@@ -63,7 +60,7 @@ new_seas_block <- function(
                   {call_text}
                 }}"
               )
-              
+
               parse(text = expr_text)[[1]]
             }),
             # Execute expression and store model for summary
@@ -72,52 +69,54 @@ new_seas_block <- function(
               if (!length(x())) {
                 return(NULL)
               }
-              
-              tryCatch({
-                # Get the data from upstream
-                input_data <- x()
-                
-                # Pre-process and evaluate the seas call
-                call_text <- r_seas_call()
-                
-                # Auto-prefix seas with seasonal:: if not already present
-                if (!grepl("seasonal::", call_text)) {
-                  call_text <- gsub("seas\\(", "seasonal::seas(", call_text)
+
+              tryCatch(
+                {
+                  # Get the data from upstream
+                  input_data <- x()
+
+                  # Pre-process and evaluate the seas call
+                  call_text <- r_seas_call()
+
+                  # Auto-prefix seas with seasonal:: if not already present
+                  if (!grepl("seasonal::", call_text)) {
+                    call_text <- gsub("seas\\(", "seasonal::seas(", call_text)
+                  }
+
+                  # Create environment with x as the input data
+                  env <- new.env()
+                  env$x <- tsbox::ts_ts(input_data)
+
+                  # Parse and execute the seas() call
+                  expr <- parse(text = call_text)[[1]]
+                  model <- eval(expr, envir = env)
+
+                  r_model(model)
+
+                  # Return the model for downstream blocks
+                  model
+                },
+                error = function(e) {
+                  showNotification(
+                    paste("Seasonal adjustment error:", e$message),
+                    type = "error"
+                  )
+                  NULL
                 }
-                
-                # Create environment with x as the input data
-                env <- new.env()
-                env$x <- tsbox::ts_ts(input_data)
-                
-                # Parse and execute the seas() call
-                expr <- parse(text = call_text)[[1]]
-                model <- eval(expr, envir = env)
-                
-                r_model(model)
-                
-                # Return the model for downstream blocks
-                model
-              }, error = function(e) {
-                showNotification(
-                  paste("Seasonal adjustment error:", e$message),
-                  type = "error"
-                )
-                NULL
-              })
+              )
             }),
             state = list(
-              seas_call = r_seas_call,
-              show_summary = r_show_summary
+              seas_call = r_seas_call
             )
           )
         }
       )
     },
-    function(id) {
+    ui = function(id) {
       tagList(
         div(
           class = "seas-block-container",
-          
+
           # CSS for clean layout
           tags$style(HTML(
             "
@@ -152,7 +151,7 @@ new_seas_block <- function(
             }
             "
           )),
-          
+
           # Seas call editor section
           div(
             class = "seas-section",
@@ -177,24 +176,14 @@ new_seas_block <- function(
               "seas(x = x, x11 = list(mode = 'mult'))"
             )
           ),
-          
-          # Summary display control
-          checkboxInput(
-            NS(id, "show_summary"),
-            label = "Show model summary",
-            value = show_summary
-          ),
-          
-          # Summary output section
-          conditionalPanel(
-            condition = paste0("input['", NS(id, "show_summary"), "'] == true"),
+
+          # Summary output section (always shown)
+          div(
+            class = "seas-section",
+            h4("Model Summary"),
             div(
-              class = "seas-section",
-              h4("Model Summary"),
-              div(
-                class = "summary-container",
-                verbatimTextOutput(NS(id, "summary"))
-              )
+              class = "summary-container",
+              verbatimTextOutput(NS(id, "summary"))
             )
           )
         )
@@ -204,4 +193,28 @@ new_seas_block <- function(
     allow_empty_state = character(0),
     ...
   )
+}
+
+#' @export
+block_ui.seas_block <- function(id, x, ...) {
+  tagList(
+    verbatimTextOutput(NS(id, "result"))
+  )
+}
+
+#' @export
+block_output.seas_block <- function(x, result, session) {
+  renderPrint({
+    if (is.null(result)) {
+      # return(NULL)
+      "dsfsdfsdfsdf"
+    }
+
+    # Display the seas model summary
+    if (inherits(result, "seas")) {
+      summary(result)
+    } else {
+      cat("No seasonal adjustment model available")
+    }
+  })
 }
