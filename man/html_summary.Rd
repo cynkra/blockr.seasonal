@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary-block.R
 \name{html_summary}
 \alias{html_summary}
-\title{Generate HTML summary for seas model}
+\title{Generate HTML summary for seas model (main function)}
 \usage{
 html_summary(seas_model)
 }

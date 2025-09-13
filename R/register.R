@@ -10,26 +10,30 @@ register_seasonal_blocks <- function() {
       "new_final_block",
       "new_monthplot_block",
       "new_series_block",
-      "new_fivebestmdl_block"
+      "new_fivebestmdl_block",
+      "new_udg_block"
     ),
     name = c(
       "Seasonal Adjustment",
       "Final Plot",
       "Monthplot",
       "Series Extraction",
-      "Five Best Models"
+      "Five Best Models",
+      "UDG Statistics"
     ),
     description = c(
       "Perform seasonal adjustment using X-13ARIMA-SEATS",
       "Plot original vs seasonally adjusted series",
       "Display seasonal patterns by month",
       "Extract time series components from seas model",
-      "Show five best ARIMA models from automatic selection"
+      "Show five best ARIMA models from automatic selection",
+      "Extract detailed X-13 statistics using udg() function"
     ),
     category = c(
       "transform",
       "plot",
       "plot",
+      "transform",
       "transform",
       "transform"
     ),

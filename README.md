@@ -56,6 +56,23 @@ board <- new_board(
   blocks = c(
     data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
     seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
+    summary = new_udg_block()
+  ),
+  links = c(
+    new_link("data", "seas"),
+    new_link("seas", "summary")
+  )
+)
+
+# Serve the dashboard
+serve(board)
+
+
+# Create a seasonal adjustment dashboard
+board <- new_board(
+  blocks = c(
+    data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
+    seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
     summary = new_summary_block()
     # month = new_monthplot_block()
   ),
