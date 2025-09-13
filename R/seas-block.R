@@ -264,7 +264,7 @@ new_seas_block <- function(
             # Height-adjustable ACE editor with embedded autocomplete
             setup_seas_ace_editor(
               NS(id, "seas_call"),
-              value = seas_call,  # Use original format
+              value = format_seas_call(seas_call),  # Format on startup
               height = "200px"
             ),
 
