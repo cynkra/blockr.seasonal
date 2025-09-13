@@ -10,6 +10,20 @@
 #'
 #' @export
 new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihood"), ...) {
+  # Load metadata for descriptions
+  metadata_file <- system.file("extdata", "udg_metadata.rds", package = "blockr.seasonal")
+  if (file.exists(metadata_file)) {
+    udg_metadata <- readRDS(metadata_file)
+  } else {
+    # Fallback if metadata doesn't exist
+    udg_metadata <- data.frame(
+      statistic = character(),
+      category = character(),
+      description = character(),
+      stringsAsFactors = FALSE
+    )
+  }
+  
   blockr.core::new_transform_block(
     server = function(id, data) {
       moduleServer(
@@ -36,8 +50,13 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
           observe({
             stats <- available_stats()
             if (length(stats) > 0) {
-              # Create descriptive labels for common statistics
+              # Create descriptive labels using metadata
               stat_labels <- sapply(stats, function(stat) {
+                # Check if we have metadata for this statistic
+                meta_row <- udg_metadata[udg_metadata$statistic == stat, ]
+                if (nrow(meta_row) > 0) {
+                  return(paste0(stat, " - ", meta_row$description[1]))
+                }
                 descriptions <- list(
                   # Model information
                   "version" = "version - X-13ARIMA-SEATS version",
@@ -88,10 +107,42 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                 }
               })
               
+              # Group statistics by category
+              stat_categories <- sapply(stats, function(stat) {
+                meta_row <- udg_metadata[udg_metadata$statistic == stat, ]
+                if (nrow(meta_row) > 0) {
+                  return(meta_row$category[1])
+                }
+                return("Other")
+              })
+              
+              # Create grouped choices
+              choices_list <- list()
+              unique_categories <- unique(stat_categories)
+              category_order <- c("Basic", "Model", "QS Test", "F-Test", "M-Stat", 
+                                "Diagnostics", "Spectrum", "X-11", "Other")
+              ordered_categories <- intersect(category_order, unique_categories)
+              
+              for (cat in ordered_categories) {
+                cat_stats <- stats[stat_categories == cat]
+                cat_choices <- cat_stats
+                names(cat_choices) <- stat_labels[stat_categories == cat]
+                choices_list[[cat]] <- cat_choices
+              }
+              
+              # Add any remaining categories
+              remaining_cats <- setdiff(unique_categories, ordered_categories)
+              for (cat in remaining_cats) {
+                cat_stats <- stats[stat_categories == cat]
+                cat_choices <- cat_stats
+                names(cat_choices) <- stat_labels[stat_categories == cat]
+                choices_list[[cat]] <- cat_choices
+              }
+              
               updateSelectizeInput(
                 session,
                 "selected_stats",
-                choices = setNames(stats, stat_labels),
+                choices = if (length(choices_list) > 1) choices_list else setNames(stats, stat_labels),
                 selected = intersect(isolate(r_selected_stats()), stats),
                 server = FALSE
               )
@@ -103,38 +154,32 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
             r_selected_stats(input$selected_stats)
           })
           
-          # Show selected statistics info
-          output$stats_info <- renderUI({
-            selected <- r_selected_stats()
-            if (length(selected) > 0) {
-              div(
-                class = "udg-stats-info",
-                h5(paste("Selected Statistics:", length(selected), "of", length(available_stats())), 
-                   class = "udg-stats-title"),
-                if (length(selected) <= 10) {
-                  tags$ul(
-                    class = "udg-stats-list",
-                    lapply(selected, function(stat) {
-                      tags$li(tags$code(stat))
-                    })
-                  )
-                } else {
-                  p(paste("Showing", length(selected), "statistics in table below"))
-                }
-              )
-            }
-          })
-          
           list(
             expr = reactive({
               selected <- r_selected_stats()
               
               if (length(selected) == 0) {
                 # Return empty data frame if no statistics selected
-                expr_text <- "data.frame(statistic = character(0), value = character(0))"
+                expr_text <- "data.frame(statistic = character(0), value = character(0), description = character(0))"
               } else {
                 # Build expression to get udg data and convert to data frame
                 selected_stats_str <- paste0("'", selected, "'", collapse = ", ")
+                
+                # Build descriptions mapping for inclusion in the expression
+                desc_lines <- character()
+                for (stat in selected) {
+                  meta_row <- udg_metadata[udg_metadata$statistic == stat, ]
+                  desc <- if (nrow(meta_row) > 0) {
+                    meta_row$description[1]
+                  } else {
+                    "X-13 diagnostic statistic"
+                  }
+                  # Escape single quotes in descriptions
+                  desc <- gsub("'", "\\\\'", desc)
+                  desc_lines <- c(desc_lines, paste0("                      '", stat, "' = '", desc, "'"))
+                }
+                desc_mapping <- paste(desc_lines, collapse = ",\n")
+                
                 expr_text <- glue::glue(
                   "{{
                     # Get all statistics from udg
@@ -150,9 +195,16 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                     
                     if (length(available_names) > 0) {{
                       filtered_stats <- scalar_stats[available_names]
+                      
+                      # Description mapping
+                      desc_map <- c(
+{desc_mapping}
+                      )
+                      
                       data.frame(
                         statistic = names(filtered_stats),
                         value = sapply(filtered_stats, as.character),
+                        description = desc_map[names(filtered_stats)],
                         row.names = NULL,
                         stringsAsFactors = FALSE
                       )
@@ -160,6 +212,7 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                       data.frame(
                         statistic = 'No statistics selected',
                         value = 'Please select valid UDG statistics',
+                        description = '',
                         stringsAsFactors = FALSE
                       )
                     }}
@@ -281,10 +334,7 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
               "and model information (nobs, transform, arimamdl). ",
               "Use the search box to find specific statistics by name or description."
             )
-          ),
-          
-          # Selected statistics info
-          uiOutput(NS(id, "stats_info"))
+          )
         )
       )
     },

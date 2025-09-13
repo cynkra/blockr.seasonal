@@ -12,25 +12,6 @@ new_summary_block <- function(...) {
       moduleServer(
         id,
         function(input, output, session) {
-          # Store the reactive seas model
-          seas_model_reactive <- reactive({
-            model <- data()
-            if (!is.null(model) && inherits(model, "seas")) {
-              model
-            } else {
-              NULL
-            }
-          })
-
-          # Add observer for X-13 Output button
-          observeEvent(input$x13_output, {
-            seas_model <- seas_model_reactive()
-            if (!is.null(seas_model)) {
-              # Open X-13 output in browser
-              seasonal::out(seas_model)
-            }
-          })
-
           list(
             expr = reactive({
               # Return the summary as a data frame with the seas model as attribute
@@ -439,8 +420,9 @@ html_tests <- function(x, digits = 4) {
 #'
 #' Pure function to generate HTML display from a seas model
 #' @param seas_model A seas model object
+#' @param session Optional session object for adding button functionality
 #' @return A tagList with HTML content
-html_summary <- function(seas_model) {
+html_summary <- function(seas_model, session = NULL) {
   if (is.null(seas_model) || !inherits(seas_model, "seas")) {
     return(div(
       style = "padding: 20px; text-align: center; color: #6c757d;",
@@ -540,17 +522,14 @@ html_summary <- function(seas_model) {
 #' @export
 block_ui.summary_block <- function(id, x, ...) {
   tagList(
-    # Add X-13 Output button
-    div(
-      style = "margin-bottom: 10px;",
-      actionButton(
-        NS(id, "x13_output"),
-        label = tagList(
-          icon("file-text"),
-          "X-13 Output"
-        ),
-        class = "btn-default"
-      )
+    actionButton(
+      NS(id, "x13_output"),
+      label = tagList(
+        icon("file-text"),
+        "X-13 Output"
+      ),
+      class = "btn-default",
+      style = "margin-bottom: 10px;"
     ),
     uiOutput(NS(id, "result"))
   )
@@ -558,10 +537,18 @@ block_ui.summary_block <- function(id, x, ...) {
 
 #' @export
 block_output.summary_block <- function(x, result, session) {
-  # result is the data frame from summary with seas model as attribute
+  # Store the seas model in the parent environment for button access
+  seas_model <- attr(result, "seas_model")
+
+  # Create observer for button click
+  observeEvent(session$input$x13_output, {
+    if (!is.null(seas_model) && inherits(seas_model, "seas")) {
+      seasonal::out(seas_model)
+    }
+  })
+
+  # Return the UI
   renderUI({
-    # Extract the seas model from the result's attribute
-    seas_model <- attr(result, "seas_model")
     html_summary(seas_model)
   })
 }
