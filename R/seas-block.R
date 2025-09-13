@@ -265,7 +265,7 @@ new_seas_block <- function(
             setup_seas_ace_editor(
               NS(id, "seas_call"),
               value = format_seas_call(seas_call),  # Format on startup
-              height = "200px"
+              height = "260px"  # Increased by ~3 lines (20px per line)
             ),
 
             # Collapsible help text

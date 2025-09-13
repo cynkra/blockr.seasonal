@@ -2,69 +2,94 @@
 #' @noRd
 get_seas_categories <- function() {
   list(
-    # Main seas() parameters
+    # Common parameter combinations
+    common_patterns = c(
+      'x11 = list()',
+      'seats = list()',
+      'transform.function = "log"',
+      'transform.function = "auto"',
+      'transform.power = 0',
+      'regression.variables = c("td")',
+      'regression.variables = c("td", "easter[8]")',
+      'regression.aictest = c("td", "easter")',
+      'arima.model = "(0 1 1)(0 1 1)"',
+      'arima.model = c(0, 1, 1, 0, 1, 1)',
+      'outlier.types = c("ao", "ls")',
+      'outlier.types = c("ao", "ls", "tc")',
+      'forecast.maxlead = 12',
+      'forecast.maxlead = 24',
+      'x11.seasonalma = "S3X9"',
+      'x11.trendma = 23'
+    ),
+
+    # Main parameters (most common)
     main_params = c(
-      "x", "xreg", "xtrans", "seats.noadmiss", "transform.function",
-      "regression.aictest", "outlier", "automdl", "composite",
-      "na.action", "out", "dir", "multimode"
+      "x", "xreg", "transform.function", "regression.variables",
+      "regression.aictest", "outlier", "outlier.types", "arima.model",
+      "x11", "seats", "forecast.maxlead", "na.action"
     ),
 
     # X-11 specifications
-    x11 = c(
-      "x11", "x11.mode", "x11.seasonalma", "x11.trendma", "x11.sigmalim",
-      "x11.appendfcst", "x11.appendbcst", "x11.calendarsigma", "x11.sigmaiter",
-      "x11.final", "x11.title", "x11.type"
+    x11_spec = c(
+      "x11.mode", "x11.seasonalma", "x11.trendma", "x11.sigmalim",
+      "x11.appendfcst", "x11.appendbcst", "x11.calendarsigma",
+      "x11.final", "x11.type"
     ),
 
     # SEATS specifications
-    seats = c(
-      "seats", "seats.appendfcst", "seats.appendbcst", "seats.finite",
-      "seats.hpcycle", "seats.noadmiss", "seats.out", "seats.qmax",
-      "seats.rmod", "seats.statsea", "seats.tabtables", "seats.save"
+    seats_spec = c(
+      "seats.noadmiss", "seats.appendfcst", "seats.appendbcst",
+      "seats.finite", "seats.hpcycle", "seats.qmax", "seats.rmod"
     ),
 
-    # Transform specifications
-    transform = c(
-      "transform.function", "transform.power", "transform.adjust",
-      "transform.aicdiff", "transform.type", "transform.units"
+    # Transform values (with quotes for strings)
+    transform_values = c(
+      '"log"', '"auto"', '"none"', '"sqrt"', '"inverse"', '"logistic"'
     ),
 
-    # Regression specifications
-    regression = c(
-      "regression.variables", "regression.aictest", "regression.user",
-      "regression.usertype", "regression.critical", "regression.span",
-      "regression.tcrate", "regression.tlimit"
+    # ARIMA model examples (common specifications)
+    arima_examples = c(
+      '"(0 1 1)(0 1 1)"', '"(1 1 0)(0 1 1)"', '"(0 1 2)(0 1 1)"',
+      '"(2 1 0)(0 1 1)"', '"(1 1 1)(0 1 1)"', '"(0 1 1)(0 1 1)12"'
     ),
 
-    # ARIMA specifications
-    arima = c(
-      "arima.model", "arima.ar", "arima.ma", "arima.diff",
-      "arima.sdiff", "arima.title"
+    # Regression variables (from Census documentation)
+    regression_vars = c(
+      '"td"', '"easter[1]"', '"easter[8]"', '"easter[15]"',
+      '"tdnolpyear"', '"tl"', '"ao"', '"ls"', '"tc"',
+      '"seasonal"', '"const"', '"lom"', '"loq"', '"lpyear"',
+      '"thank"', '"labor"', '"sceaster"', '"easterstock"'
     ),
 
-    # Automdl specifications
-    automdl = c(
-      "automdl", "automdl.maxorder", "automdl.maxdiff", "automdl.diff",
+    # Outlier types (with quotes)
+    outlier_values = c(
+      '"ao"', '"ls"', '"tc"', '"so"', '"rp"', '"tl"'
+    ),
+
+    # X11 seasonal moving average options
+    x11_seasonalma_values = c(
+      '"S3X3"', '"S3X5"', '"S3X9"', '"S3X15"', '"Msr"', '"Stable"'
+    ),
+
+    # X11 mode options
+    x11_mode_values = c(
+      '"mult"', '"add"', '"pseudoadd"', '"logadd"'
+    ),
+
+    # Automdl parameters
+    automdl_spec = c(
+      "automdl", "automdl.maxorder", "automdl.maxdiff",
       "automdl.ljungboxlimit", "automdl.reduce", "automdl.acceptdefault"
     ),
 
-    # Outlier specifications
-    outlier = c(
-      "outlier", "outlier.types", "outlier.critical", "outlier.span",
-      "outlier.method", "outlier.tcrate"
+    # Forecast parameters
+    forecast_spec = c(
+      "forecast.maxback", "forecast.probability", "forecast.save"
     ),
 
-    # Common function values
-    transform_functions = c("auto", "none", "log"),
-    modes = c("mult", "add", "logadd", "pseudoadd"),
-    outlier_types = c("AO", "LS", "TC", "SO"),
-    regression_variables = c("td", "easter", "const", "seasonal"),
-    boolean_values = c("yes", "no"),
-
-    # Common seasonal patterns
-    seasonal_patterns = c(
-      "seasonal", "trend", "irregular", "sa", "sf", "final",
-      "forecasts", "backcasts", "residuals"
+    # Check parameters
+    check_spec = c(
+      "check.maxlag", "check.print", "check.qtype", "check.save"
     )
   )
 }
@@ -90,31 +115,36 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
 
         // Process each category
         Object.keys(categories).forEach(function(category) {
-          categories[category].forEach(function(fn) {
-            var meta = category;
-            var value = fn;
-            var caption = fn;
+          categories[category].forEach(function(item) {
+            var meta = category.replace(/_/g, " ");
+            var value = item;
+            var caption = item;
             var score = 1000;
 
-            // Special handling for different types
-            if (category === "main_params") {
-              value = fn + " = ";
-              meta = "parameter";
-              score = 1100;
-            } else if (category.endsWith("_functions") || category.endsWith("_values") ||
-                      category === "boolean_values" || category === "modes" ||
-                      category === "outlier_types" || category === "regression_variables") {
-              value = "\\"" + fn + "\\"";
-              meta = "value";
-              score = 900;
-            } else if (category === "seasonal_patterns") {
+            // Special handling for different categories
+            if (category === "common_patterns") {
+              // Common patterns - high priority
               meta = "pattern";
-              score = 950;
+              score = 1400;
+            } else if (category === "main_params") {
+              // Main parameters - add " = " suffix
+              value = item + " = ";
+              meta = "parameter";
+              score = 1300;
+            } else if (category.endsWith("_spec")) {
+              // Specification parameters - add " = " suffix
+              value = item + " = ";
+              meta = category.replace("_spec", "");
+              score = 1100;
+            } else if (category.endsWith("_values") || category.endsWith("_examples") ||
+                       category.endsWith("_vars")) {
+              // Values are already quoted in the list
+              meta = "value";
+              score = 1000;
             } else {
-              // Spec.argument parameters
-              value = fn + " = ";
-              meta = "spec";
-              score = 1050;
+              // Default handling
+              meta = "option";
+              score = 900;
             }
 
             wordList.push({
@@ -126,35 +156,20 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
           });
         });
 
-        // Add common seas() examples
-        var examples = [
-          {
-            caption: "seas(x = x, x11 = list())",
-            value: "seas(x = x, x11 = list())",
-            meta: "example",
-            score: 1200
-          },
-          {
-            caption: "seas(x = x, seats = list())",
-            value: "seas(x = x, seats = list())",
-            meta: "example",
-            score: 1200
-          },
-          {
-            caption: "transform.power = 0",
-            value: "transform.power = 0",
-            meta: "example",
-            score: 1150
-          },
-          {
-            caption: "list()",
-            value: "list()",
-            meta: "function",
-            score: 1000
-          }
-        ];
+        // Add helper functions
+        wordList.push({
+          caption: "list()",
+          value: "list()",
+          meta: "function",
+          score: 1200
+        });
 
-        wordList = wordList.concat(examples);
+        wordList.push({
+          caption: "c()",
+          value: "c()",
+          meta: "function",
+          score: 1200
+        });
 
         // Sort by score (examples first, parameters, specs, values, patterns)
         wordList.sort(function(a, b) {
@@ -256,7 +271,7 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
   )
 
   tagList(
-    # CSS for resizable editor
+    # CSS for resizable editor and wider autocomplete
     tags$style(HTML(sprintf(
       '
       .seas-ace-container {
@@ -288,6 +303,18 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
         content: "⋯";
         color: #6c757d;
         font-weight: bold;
+      }
+
+      /* Make autocomplete dropdown wider */
+      .ace_autocomplete {
+        width: 500px !important;
+        max-width: 600px !important;
+      }
+
+      .ace_autocomplete .ace_line {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
       }
       ',
       height
