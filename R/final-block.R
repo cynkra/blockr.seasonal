@@ -1,68 +1,66 @@
-#' Final Plot Block
+#' Final Series Block
 #'
-#' Displays the original and seasonally adjusted series from a seas model.
-#' This is the most important diagnostic plot for seasonal adjustment.
+#' Extracts the seasonally adjusted series (and optionally the original series) 
+#' from a seas model and displays it as a dygraph.
 #'
-#' @param ... Additional arguments passed to new_plot_block
+#' @param include_original Logical. Include the original series alongside the adjusted series (default: TRUE)
+#' @param ... Additional arguments passed to new_ts_transform_block
 #'
 #' @export
-new_final_block <- function(...) {
-  blockr.core::new_plot_block(
-    function(id, data) {
+new_final_block <- function(include_original = TRUE, ...) {
+  blockr.ts::new_ts_transform_block(
+    server = function(id, data) {
       moduleServer(
         id,
         function(input, output, session) {
+          # Initialize reactive values with r_ prefix
+          r_include_original <- reactiveVal(include_original)
+          
+          # Input observers
+          observeEvent(input$include_original, {
+            r_include_original(input$include_original)
+          })
           
           list(
             expr = reactive({
-              # Extract final (adjusted) series from seas model
-              expr_text <- "seasonal::final(data)"
-              parse(text = expr_text)[[1]]
-            }),
-            # Transform the seas model into plottable data
-            result = reactive({
-              req(data())
+              include_orig <- r_include_original()
               
-              tryCatch({
-                model <- data()
-                
-                # Check if input is a seas model
-                if (!inherits(model, "seas")) {
-                  stop("Input must be a seas model object")
-                }
-                
-                # Extract original and adjusted series
-                original <- seasonal::original(model)
-                adjusted <- seasonal::final(model)
-                
-                # Combine into a single ts object for plotting
-                combined <- cbind(
-                  Original = original,
-                  Adjusted = adjusted
-                )
-                
-                # Return the combined series
-                combined
-              }, error = function(e) {
-                showNotification(
-                  paste("Final plot error:", e$message),
-                  type = "error"
-                )
-                NULL
-              })
-            }),
-            # Use blockr.ts plotting method
-            plot_expr = reactive({
-              # Use dygraphs via blockr.ts for consistency
-              expr_text <- "blockr.ts:::plot_dygraph(data)"
+              if (include_orig) {
+                # Return both original and adjusted series
+                expr_text <- "
+                {
+                  # Extract series from seas model
+                  original <- seasonal::original(data)
+                  adjusted <- seasonal::final(data)
+                  
+                  # Combine into multivariate ts object
+                  combined <- cbind(Original = original, Adjusted = adjusted)
+                  
+                  # Convert to tsbox format for dygraph display
+                  tsbox::ts_tbl(combined)
+                }"
+              } else {
+                # Return only adjusted series
+                expr_text <- "
+                {
+                  # Extract adjusted series from seas model
+                  adjusted <- seasonal::final(data)
+                  
+                  # Convert to tsbox format for dygraph display
+                  tsbox::ts_tbl(adjusted)
+                }"
+              }
+              
               parse(text = expr_text)[[1]]
             }),
-            state = list()
+            state = list(
+              include_original = r_include_original
+            )
           )
         }
       )
     },
-    function(id) {
+    ui = function(id) {
       tagList(
         div(
           class = "final-block-container",
@@ -71,6 +69,8 @@ new_final_block <- function(...) {
             "
             .final-block-container {
               padding: 10px;
+              background: #f8f9fa;
+              border-radius: 4px;
             }
             .final-block-title {
               margin-bottom: 10px;
@@ -83,12 +83,18 @@ new_final_block <- function(...) {
           
           div(
             class = "final-block-title",
-            "Original vs Seasonally Adjusted Series"
+            "Seasonally Adjusted Series"
+          ),
+          
+          checkboxInput(
+            NS(id, "include_original"),
+            label = "Include original series",
+            value = include_original
           ),
           
           helpText(
-            "Compares the original time series with the seasonally adjusted series. ",
-            "The adjusted series removes seasonal patterns while preserving trend and irregular components."
+            "Displays the seasonally adjusted series from the seasonal adjustment model.",
+            "When checked, also shows the original series for comparison."
           )
         )
       )

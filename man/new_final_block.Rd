@@ -2,14 +2,16 @@
 % Please edit documentation in R/final-block.R
 \name{new_final_block}
 \alias{new_final_block}
-\title{Final Plot Block}
+\title{Final Series Block}
 \usage{
-new_final_block(...)
+new_final_block(include_original = TRUE, ...)
 }
 \arguments{
-\item{...}{Additional arguments passed to new_plot_block}
+\item{include_original}{Logical. Include the original series alongside the adjusted series (default: TRUE)}
+
+\item{...}{Additional arguments passed to new_ts_transform_block}
 }
 \description{
-Displays the original and seasonally adjusted series from a seas model.
-This is the most important diagnostic plot for seasonal adjustment.
+Extracts the seasonally adjusted series (and optionally the original series)
+from a seas model and displays it as a dygraph.
 }

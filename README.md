@@ -56,13 +56,13 @@ board <- new_board(
   blocks = c(
     data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
     seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
-    final = new_final_block(),
-    month = new_monthplot_block()
+    final = new_final_block()
+    # month = new_monthplot_block()
   ),
   links = c(
     new_link("data", "seas"),
-    new_link("seas", "final"),
-    new_link("seas", "month")
+    new_link("seas", "final")
+    # new_link("seas", "month")
   )
 )
 
