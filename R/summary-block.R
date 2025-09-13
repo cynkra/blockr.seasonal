@@ -436,45 +436,81 @@ html_summary <- function(seas_model, session = NULL) {
     tags$style(HTML(
       "
       .seas-summary-container {
-        padding: 15px;
-        background: white;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        margin: 10px 0;
       }
       .seas-summary-header {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 600;
-        color: #212529;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #e9ecef;
+        color: #2c3e50;
+        margin-bottom: 25px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #e1e8ed;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .seas-x13-link {
+        font-size: 13px;
+        font-weight: normal;
+        color: #6c757d;
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+      .seas-x13-link:hover {
+        color: #007bff;
+        text-decoration: underline;
       }
       .seas-column-header {
         font-size: 14px;
         font-weight: 600;
         color: #495057;
         margin-bottom: 15px;
-        padding-bottom: 5px;
+        padding-bottom: 8px;
         border-bottom: 1px solid #e9ecef;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       .table-condensed {
         border-collapse: collapse;
+        width: 100%;
       }
       .table-condensed td {
-        border-bottom: 1px solid #e9ecef;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 6px 8px !important;
+        transition: background-color 0.15s;
+      }
+      .table-condensed tr:hover td {
+        background-color: #f8f9fa;
       }
       .table-condensed tr:last-child td {
         border-bottom: none;
       }
       .badge {
         display: inline-block;
-        padding: 2px 6px;
+        padding: 3px 7px;
         font-size: 10px;
-        font-weight: 700;
+        font-weight: 600;
         line-height: 1;
         color: #fff;
         text-align: center;
         white-space: nowrap;
         vertical-align: baseline;
-        border-radius: 3px;
+        border-radius: 12px;
+        letter-spacing: 0.3px;
+      }
+      .seas-stats-row {
+        background-color: #f8f9fa;
+      }
+      .seas-stats-row:nth-child(even) {
+        background-color: #ffffff;
+      }
+      .col-md-4 {
+        padding: 0 15px;
       }
     "
     )),
@@ -482,8 +518,23 @@ html_summary <- function(seas_model, session = NULL) {
     div(
       class = "seas-summary-container",
 
-      # Main header
-      div(class = "seas-summary-header", "Summary"),
+      # Main header with X-13 Output link
+      div(
+        class = "seas-summary-header",
+        span("Summary"),
+        if (!is.null(session)) {
+          actionLink(
+            session$ns("x13_output"),
+            label = tagList(
+              icon("file-text-o"),
+              "X-13 Output"
+            ),
+            class = "seas-x13-link"
+          )
+        } else {
+          NULL
+        }
+      ),
 
       # Three column layout using Bootstrap grid
       tags$div(
@@ -521,18 +572,7 @@ html_summary <- function(seas_model, session = NULL) {
 
 #' @export
 block_ui.summary_block <- function(id, x, ...) {
-  tagList(
-    actionButton(
-      NS(id, "x13_output"),
-      label = tagList(
-        icon("file-text"),
-        "X-13 Output"
-      ),
-      class = "btn-default",
-      style = "margin-bottom: 10px;"
-    ),
-    uiOutput(NS(id, "result"))
-  )
+  uiOutput(NS(id, "result"))
 }
 
 #' @export
@@ -547,8 +587,8 @@ block_output.summary_block <- function(x, result, session) {
     }
   })
 
-  # Return the UI
+  # Return the UI with session for the X-13 link
   renderUI({
-    html_summary(seas_model)
+    html_summary(seas_model, session)
   })
 }
