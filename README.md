@@ -14,77 +14,72 @@ devtools::load_all("/path/to/blockr/blockr.seasonal")
 
 ## Quick Start
 
-![Seasonal Adjustment Dashboard](man/figures/seasonal-dashboard.png)
+```r
+library(blockr.core)
+library(blockr.seasonal)
+library(blockr.ts)
+
+# Simple seasonal adjustment
+serve(
+  new_board(
+    blocks = c(
+      data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
+      seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
+      final = new_final_block()
+    ),
+    links = c(
+      new_link("data", "seas"),
+      new_link("seas", "final")
+    )
+  )
+)
+```
+
+## Comprehensive Dashboard Example
+
+This example demonstrates **ALL available blocks** in blockr.seasonal:
 
 ```r
 library(blockr.core)
 library(blockr.seasonal)
 library(blockr.ts)
 
-
+# Complete seasonal adjustment dashboard with all blocks
 serve(
-  new_seas_block(
-    seas_call = "seas(x = x, x11 = list())"),
-  data = list(x = tsbox::ts_tbl(AirPassengers))
-)
-
-# Create a seasonal adjustment dashboard
-board <- blockr.core::new_board(
-  blocks = c(
-    data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
-    seas = new_seas_block(seas_call = "seas(x)")
-  ),
-  links = c(
-    blockr.core::new_link("data", "seas", "x")
+  new_board(
+    blocks = c(
+      # Data input
+      data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
+      
+      # Main seasonal adjustment block with interactive editor
+      seas = new_seas_block(
+        seas_call = "seas(x = x, x11 = list())",
+        show_summary = TRUE
+      ),
+      
+      # Visualization blocks
+      final = new_final_block(),           # Original vs adjusted series
+      month = new_monthplot_block(),       # Seasonal patterns by month
+      
+      # Diagnostic blocks
+      series = new_series_block(            # Extract components
+        component = "trend"
+      ),
+      udg = new_udg_block(),                # X-13 statistics via udg()
+      summary = new_summary_block()        # Enhanced model summary
+    ),
+    
+    # Link all blocks to the seasonal adjustment model
+    links = c(
+      new_link("data", "seas"),
+      new_link("seas", "final"),
+      new_link("seas", "month"),
+      new_link("seas", "series"),
+      new_link("seas", "udg"),
+      new_link("seas", "summary")
+    )
   )
 )
-
-# Serve the dashboard
-serve(board)
-
-
-serve(
-  new_seas_block(
-    seas_call = "seas(x = x, x11 = list())"),
-  data = list(x = tsbox::ts_tbl(AirPassengers))
-)
-
-
-
-# Create a seasonal adjustment dashboard
-board <- new_board(
-  blocks = c(
-    data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
-    seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
-    summary = new_udg_block()
-  ),
-  links = c(
-    new_link("data", "seas"),
-    new_link("seas", "summary")
-  )
-)
-
-# Serve the dashboard
-serve(board)
-
-
-# Create a seasonal adjustment dashboard
-board <- new_board(
-  blocks = c(
-    data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
-    seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
-    summary = new_summary_block()
-    # month = new_monthplot_block()
-  ),
-  links = c(
-    new_link("data", "seas"),
-    new_link("seas", "summary")
-    # new_link("seas", "month")
-  )
-)
-
-# Serve the dashboard
-serve(board)
 ```
 
 ## Key Innovation: Model-as-Output Pattern
@@ -115,7 +110,7 @@ blockr.seasonal is the **first blockr package where blocks output statistical mo
 └─────────┘   └─────────┘   └─────────┘
 ```
 
-## Block Documentation
+## Available Blocks
 
 ### Core Block
 
@@ -149,12 +144,14 @@ Shows seasonal patterns by month/period.
 **Input:** seas model from `new_seas_block()`
 **Output:** Monthplot showing seasonal subseries
 
+### Transform/Extract Blocks
+
 #### `new_series_block()`
 
 Extracts specific components from the seasonal adjustment.
 
 **Parameters:**
-- `component`: Component to extract ("trend", "seasonal", "irregular", etc.)
+- `component`: Component to extract ("trend", "seasonal", "irregular", "final", etc.)
 
 **Input:** seas model from `new_seas_block()`
 **Output:** blockr.ts time series object (can be used with any blockr.ts blocks)
@@ -163,17 +160,24 @@ Extracts specific components from the seasonal adjustment.
 
 #### `new_fivebestmdl_block()`
 
-Compares the five best ARIMA models.
+Compares the five best ARIMA models from automatic model selection.
 
 **Input:** seas model from `new_seas_block()`
-**Output:** Model comparison table
+**Output:** Model comparison table showing BIC, AIC, and other statistics
+
+#### `new_udg_block()`
+
+Extracts detailed X-13 statistics using the `udg()` function.
+
+**Input:** seas model from `new_seas_block()`
+**Output:** Comprehensive X-13 diagnostics and statistics
 
 #### `new_summary_block()`
 
 Enhanced model diagnostics and statistical tests.
 
 **Input:** seas model from `new_seas_block()`
-**Output:** Detailed diagnostic summary
+**Output:** Detailed diagnostic summary with tests and quality measures
 
 ## Example Workflows
 
@@ -184,7 +188,7 @@ library(blockr.core)
 library(blockr.seasonal)
 library(blockr.ts)
 
-# Standalone usage - with data source
+# Standalone usage with data source
 serve(
   new_board(
     blocks = c(
@@ -196,14 +200,12 @@ serve(
     )
   )
 )
-
-
 ```
 
 ### Basic Seasonal Adjustment
 
 ```r
-# Simple X-11 adjustment
+# Simple X-11 adjustment with visualization
 serve(
   new_board(
     blocks = c(
