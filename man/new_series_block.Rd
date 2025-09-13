@@ -4,15 +4,17 @@
 \alias{new_series_block}
 \title{Series Extraction Block}
 \usage{
-new_series_block(component = "final", ...)
+new_series_block(series = "final", ...)
 }
 \arguments{
-\item{component}{Which component to extract ("final", "seasonal", "trend", "irregular", "original")}
+\item{series}{Which series to extract. Can be standard components like
+"final", "seasonal", "trend", "irregular", "original" or any X-13
+series code (e.g., "d10", "d11", "d12", "d13", etc.)}
 
-\item{...}{Additional arguments passed to new_transform_block}
+\item{...}{Additional arguments passed to new_ts_transform_block}
 }
 \description{
-Extracts specific components from a seas model as time series.
+Extracts specific components or series from a seas model as time series.
 Returns blockr.ts compatible time series objects that can be
-used with other blockr.ts blocks.
+used with other blockr.ts blocks and displays as dygraph.
 }

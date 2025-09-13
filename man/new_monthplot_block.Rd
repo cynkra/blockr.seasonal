@@ -4,14 +4,12 @@
 \alias{new_monthplot_block}
 \title{Monthplot Block}
 \usage{
-new_monthplot_block(component = "seasonal", ...)
+new_monthplot_block(...)
 }
 \arguments{
-\item{component}{Which component to plot ("final", "seasonal", "trend", "irregular")}
-
 \item{...}{Additional arguments passed to new_plot_block}
 }
 \description{
-Displays seasonal patterns by month using the monthplot function.
-Shows the seasonal subseries for each month across years.
+Displays seasonal patterns by month/period using the monthplot function.
+Shows the seasonal subseries for each period across years.
 }
