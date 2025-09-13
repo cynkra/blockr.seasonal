@@ -4,16 +4,10 @@
 \alias{new_seas_block}
 \title{Seasonal Adjustment Block}
 \usage{
-new_seas_block(
-  seas_call = "seas(x = x, x11 = list())",
-  show_summary = TRUE,
-  ...
-)
+new_seas_block(seas_call = "seas(x = x, x11 = list())", ...)
 }
 \arguments{
 \item{seas_call}{String containing the complete seas() call (default: "seas(x = x, x11 = list())")}
-
-\item{show_summary}{Whether to display model summary in the block}
 
 \item{...}{Additional arguments passed to new_transform_block}
 }

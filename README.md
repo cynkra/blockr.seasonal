@@ -22,6 +22,12 @@ library(blockr.seasonal)
 library(blockr.ts)
 
 
+serve(
+  new_seas_block(
+    seas_call = "seas(x = x, x11 = list())"),
+  data = list(x = tsbox::ts_tbl(AirPassengers))
+)
+
 # Create a seasonal adjustment dashboard
 board <- blockr.core::new_board(
   blocks = c(
