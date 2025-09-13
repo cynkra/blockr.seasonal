@@ -25,11 +25,11 @@ serve(
     blocks = c(
       data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
       seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
-      final = new_final_block()
+      series = new_series_block(series = "d10")
     ),
     links = c(
       new_link("data", "seas"),
-      new_link("seas", "final")
+      new_link("seas", "series")
     )
   )
 )
@@ -50,26 +50,25 @@ serve(
     blocks = c(
       # Data input
       data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
-      
+
       # Main seasonal adjustment block with interactive editor
       seas = new_seas_block(
-        seas_call = "seas(x = x, x11 = list())",
-        show_summary = TRUE
+        seas_call = "seas(x = x, x11 = list())"
       ),
-      
+
       # Visualization blocks
       final = new_final_block(),           # Original vs adjusted series
       month = new_monthplot_block(),       # Seasonal patterns by month
-      
+
       # Diagnostic blocks
       series = new_series_block(            # Extract components
-        component = "trend"
+        series = "d10"
       ),
       models = new_fivebestmdl_block(),    # Five best ARIMA models
       udg = new_udg_block(),                # X-13 statistics via udg()
       summary = new_summary_block()        # Enhanced model summary
     ),
-    
+
     # Link all blocks to the seasonal adjustment model
     links = c(
       new_link("data", "seas"),
@@ -122,7 +121,6 @@ Creates the main seasonal adjustment block using X-13ARIMA-SEATS.
 
 **Parameters:**
 - `seas_call`: String containing the complete seas() call (default: `"seas(x = x, x11 = list())"`)
-- `show_summary`: Boolean to display model summary in block (default: TRUE)
 
 **Features:**
 - Interactive Ace editor for modifying seasonal adjustment specifications
@@ -232,8 +230,7 @@ serve(
     blocks = c(
       data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
       seas = new_seas_block(
-        seas_call = "seas(x = x, x11 = list(mode = 'mult'))",
-        show_summary = TRUE
+        seas_call = "seas(x = x, x11 = list(mode = 'mult'))"
       ),
       final = new_final_block(),
       month = new_monthplot_block(),
