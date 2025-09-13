@@ -9,9 +9,16 @@
 #' @param ... Additional arguments passed to new_transform_block
 #'
 #' @export
-new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihood"), ...) {
+new_udg_block <- function(
+  selected_stats = c("nobs", "aic", "bic", "loglikelihood"),
+  ...
+) {
   # Load metadata for descriptions
-  metadata_file <- system.file("extdata", "udg_metadata.rds", package = "blockr.seasonal")
+  metadata_file <- system.file(
+    "extdata",
+    "udg_metadata.rds",
+    package = "blockr.seasonal"
+  )
   if (file.exists(metadata_file)) {
     udg_metadata <- readRDS(metadata_file)
   } else {
@@ -23,7 +30,7 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
       stringsAsFactors = FALSE
     )
   }
-  
+
   blockr.core::new_transform_block(
     server = function(id, data) {
       moduleServer(
@@ -31,21 +38,25 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
         function(input, output, session) {
           # Initialize reactive values with r_ prefix
           r_selected_stats <- reactiveVal(selected_stats)
-          
+
           # Get available statistics from the udg output
           available_stats <- reactive({
-            tryCatch({
-              # Get all available statistics
-              udg_result <- seasonal::udg(data())
-              # Extract scalar statistics only (numeric and character with length 1)
-              scalar_stats <- udg_result[sapply(udg_result, function(x) 
-                (is.numeric(x) || is.character(x)) && length(x) == 1)]
-              names(scalar_stats)
-            }, error = function(e) {
-              character(0)
-            })
+            tryCatch(
+              {
+                # Get all available statistics
+                udg_result <- seasonal::udg(data())
+                # Extract scalar statistics only (numeric and character with length 1)
+                scalar_stats <- udg_result[sapply(udg_result, function(x) {
+                  (is.numeric(x) || is.character(x)) && length(x) == 1
+                })]
+                names(scalar_stats)
+              },
+              error = function(e) {
+                character(0)
+              }
+            )
           })
-          
+
           # Update selectize choices when data changes
           observe({
             stats <- available_stats()
@@ -69,44 +80,44 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                   "aic" = "aic - Akaike Information Criterion",
                   "aicc" = "aicc - Corrected AIC",
                   "bic" = "bic - Bayesian Information Criterion",
-                  
+
                   # Seasonal adjustment
                   "samode" = "samode - Seasonal adjustment mode",
                   "finmode" = "finmode - Final seasonal factors mode",
                   "seasonalma" = "seasonalma - Seasonal moving average",
                   "trendma" = "trendma - Trend moving average",
-                  
+
                   # Quality statistics
                   "qslog" = "qslog - Q statistic on log scale",
                   "qsori" = "qsori - Q statistic original",
                   "qssadj" = "qssadj - Q statistic seasonally adjusted",
                   "qsirr" = "qsirr - Q statistic irregular",
-                  
+
                   # Diagnostics
                   "skewness" = "skewness - Skewness of residuals",
                   "kurtosis" = "kurtosis - Kurtosis of residuals",
                   "durbinwatson" = "durbinwatson - Durbin-Watson statistic",
                   "friedman" = "friedman - Friedman test statistic",
-                  
+
                   # Model details
                   "nmodel" = "nmodel - Number of model parameters",
                   "nreg" = "nreg - Number of regressors",
                   "variance$mle" = "variance$mle - MLE variance estimate",
                   "converged" = "converged - Model convergence status",
                   "niter" = "niter - Number of iterations",
-                  
+
                   # Forecasting
                   "nfcst" = "nfcst - Number of forecasts",
                   "ciprob" = "ciprob - Confidence interval probability"
                 )
-                
+
                 if (stat %in% names(descriptions)) {
                   descriptions[[stat]]
                 } else {
                   paste0(stat, " - X-13 diagnostic statistic")
                 }
               })
-              
+
               # Group statistics by category
               stat_categories <- sapply(stats, function(stat) {
                 meta_row <- udg_metadata[udg_metadata$statistic == stat, ]
@@ -115,21 +126,30 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                 }
                 return("Other")
               })
-              
+
               # Create grouped choices
               choices_list <- list()
               unique_categories <- unique(stat_categories)
-              category_order <- c("Basic", "Model", "QS Test", "F-Test", "M-Stat", 
-                                "Diagnostics", "Spectrum", "X-11", "Other")
+              category_order <- c(
+                "Basic",
+                "Model",
+                "QS Test",
+                "F-Test",
+                "M-Stat",
+                "Diagnostics",
+                "Spectrum",
+                "X-11",
+                "Other"
+              )
               ordered_categories <- intersect(category_order, unique_categories)
-              
+
               for (cat in ordered_categories) {
                 cat_stats <- stats[stat_categories == cat]
                 cat_choices <- cat_stats
                 names(cat_choices) <- stat_labels[stat_categories == cat]
                 choices_list[[cat]] <- cat_choices
               }
-              
+
               # Add any remaining categories
               remaining_cats <- setdiff(unique_categories, ordered_categories)
               for (cat in remaining_cats) {
@@ -138,33 +158,42 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                 names(cat_choices) <- stat_labels[stat_categories == cat]
                 choices_list[[cat]] <- cat_choices
               }
-              
+
               updateSelectizeInput(
                 session,
                 "selected_stats",
-                choices = if (length(choices_list) > 1) choices_list else setNames(stats, stat_labels),
+                choices = if (length(choices_list) > 1) {
+                  choices_list
+                } else {
+                  setNames(stats, stat_labels)
+                },
                 selected = intersect(isolate(r_selected_stats()), stats),
                 server = FALSE
               )
             }
           })
-          
+
           # Input observers
           observeEvent(input$selected_stats, {
             r_selected_stats(input$selected_stats)
           })
-          
+
           list(
             expr = reactive({
               selected <- r_selected_stats()
-              
+
               if (length(selected) == 0) {
                 # Return empty data frame if no statistics selected
                 expr_text <- "data.frame(statistic = character(0), value = character(0), description = character(0))"
               } else {
                 # Build expression to get udg data and convert to data frame
-                selected_stats_str <- paste0("'", selected, "'", collapse = ", ")
-                
+                selected_stats_str <- paste0(
+                  "'",
+                  selected,
+                  "'",
+                  collapse = ", "
+                )
+
                 # Build descriptions mapping for inclusion in the expression
                 desc_lines <- character()
                 for (stat in selected) {
@@ -176,10 +205,13 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                   }
                   # Escape single quotes in descriptions
                   desc <- gsub("'", "\\\\'", desc)
-                  desc_lines <- c(desc_lines, paste0("                      '", stat, "' = '", desc, "'"))
+                  desc_lines <- c(
+                    desc_lines,
+                    paste0("                      '", stat, "' = '", desc, "'")
+                  )
                 }
                 desc_mapping <- paste(desc_lines, collapse = ",\n")
-                
+
                 expr_text <- glue::glue(
                   "{{
                     # Get all statistics from udg
@@ -219,7 +251,7 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                   }}"
                 )
               }
-              
+
               parse(text = expr_text)[[1]]
             }),
             state = list(
@@ -233,7 +265,7 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
       tagList(
         div(
           class = "udg-block-container",
-          
+
           # CSS styling
           tags$style(HTML(
             "
@@ -292,7 +324,7 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
             }
             "
           )),
-          
+
           # Statistics selection section
           div(
             class = "udg-section",
@@ -300,7 +332,7 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
             selectizeInput(
               NS(id, "selected_stats"),
               label = "Select Statistics to Display",
-              choices = NULL,  # Set in server
+              choices = NULL, # Set in server
               selected = selected_stats,
               multiple = TRUE,
               width = "100%",
@@ -309,7 +341,8 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                 searchField = c("label", "value"),
                 maxOptions = 200,
                 plugins = list("remove_button"),
-                render = I('{
+                render = I(
+                  '{
                   option: function(item, escape) {
                     var label = item.label || item.value;
                     var parts = label.split(" - ");
@@ -324,7 +357,8 @@ new_udg_block <- function(selected_stats = c("nobs", "aic", "bic", "loglikelihoo
                   item: function(item, escape) {
                     return "<div>" + escape(item.value) + "</div>";
                   }
-                }')
+                }'
+                )
               )
             ),
             helpText(

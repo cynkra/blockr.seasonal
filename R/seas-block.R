@@ -30,12 +30,12 @@ new_seas_block <- function(
             expr = reactive({
               # Build expression for blockr to evaluate
               call_text <- r_seas_call()
-              
+
               # Auto-prefix seas with seasonal:: if not already present
               if (!grepl("seasonal::", call_text)) {
                 call_text <- gsub("seas\\(", "seasonal::seas(", call_text)
               }
-              
+
               # Create expression that converts x to ts and evaluates seas
               expr_text <- glue::glue(
                 "local({{
@@ -43,7 +43,7 @@ new_seas_block <- function(
                   {call_text}
                 }})"
               )
-              
+
               parse(text = expr_text)[[1]]
             }),
             state = list(

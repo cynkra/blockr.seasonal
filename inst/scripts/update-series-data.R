@@ -17,7 +17,10 @@ message("Fetching series.R from seasonal package...")
 response <- GET(url)
 
 if (status_code(response) != 200) {
-  stop("Failed to fetch series.R from GitHub. Status code: ", status_code(response))
+  stop(
+    "Failed to fetch series.R from GitHub. Status code: ",
+    status_code(response)
+  )
 }
 
 # Get the content
@@ -38,11 +41,13 @@ series_data <- list()
 
 for (line in table_lines) {
   # Skip the header line
-  if (str_detect(line, "\\*\\*spec\\*\\*")) next
-  
+  if (str_detect(line, "\\*\\*spec\\*\\*")) {
+    next
+  }
+
   # Split by \tab
   parts <- str_split(line, "\\\\tab")[[1]]
-  
+
   if (length(parts) >= 4) {
     # Clean up each part
     spec <- str_trim(str_replace_all(parts[1], "#' ", ""))
@@ -50,7 +55,7 @@ for (line in table_lines) {
     short_name <- str_trim(parts[3])
     # Remove \cr from description
     description <- str_trim(str_replace_all(parts[4], "\\\\cr", ""))
-    
+
     # Skip empty entries
     if (nzchar(spec) && nzchar(short_name)) {
       series_data[[length(series_data) + 1]] <- list(
@@ -65,7 +70,10 @@ for (line in table_lines) {
 
 # Convert to data frame
 if (length(series_data) > 0) {
-  series_df <- do.call(rbind, lapply(series_data, as.data.frame, stringsAsFactors = FALSE))
+  series_df <- do.call(
+    rbind,
+    lapply(series_data, as.data.frame, stringsAsFactors = FALSE)
+  )
 } else {
   stop("No series codes found in the documentation")
 }
@@ -79,7 +87,7 @@ additional_series <- data.frame(
   description = c(
     "Original series",
     "Seasonally adjusted (final) series",
-    "Seasonal component", 
+    "Seasonal component",
     "Trend-cycle component",
     "Irregular component"
   ),
@@ -88,7 +96,9 @@ additional_series <- data.frame(
 
 # Check if these aren't already in the data
 existing_codes <- series_df$short_name
-new_codes <- additional_series[!additional_series$short_name %in% existing_codes, ]
+new_codes <- additional_series[
+  !additional_series$short_name %in% existing_codes,
+]
 if (nrow(new_codes) > 0) {
   series_df <- rbind(new_codes, series_df)
 }

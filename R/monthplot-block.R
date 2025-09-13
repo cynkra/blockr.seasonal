@@ -12,7 +12,6 @@ new_monthplot_block <- function(...) {
       moduleServer(
         id,
         function(input, output, session) {
-          
           list(
             expr = reactive({
               # Simple expression: call monthplot on the seas model
@@ -29,7 +28,7 @@ new_monthplot_block <- function(...) {
       tagList(
         div(
           class = "monthplot-block-container",
-          
+
           tags$style(HTML(
             "
             .monthplot-block-container {
@@ -45,12 +44,12 @@ new_monthplot_block <- function(...) {
             }
             "
           )),
-          
+
           div(
             class = "monthplot-block-title",
             "Seasonal Patterns by Period"
           ),
-          
+
           helpText(
             "Displays seasonal patterns across periods (months/quarters). ",
             "Each line represents a different year, showing seasonal variation."

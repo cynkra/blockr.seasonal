@@ -5,14 +5,18 @@
 #' used with other blockr.ts blocks and displays as dygraph.
 #'
 #' @param series Which series to extract. Can be standard components like
-#'   "final", "seasonal", "trend", "irregular", "original" or any X-13 
+#'   "final", "seasonal", "trend", "irregular", "original" or any X-13
 #'   series code (e.g., "d10", "d11", "d12", "d13", etc.)
 #' @param ... Additional arguments passed to new_ts_transform_block
 #'
 #' @export
 new_series_block <- function(series = "final", ...) {
   # Load series codes data
-  series_codes_file <- system.file("extdata", "series_codes.rds", package = "blockr.seasonal")
+  series_codes_file <- system.file(
+    "extdata",
+    "series_codes.rds",
+    package = "blockr.seasonal"
+  )
   if (file.exists(series_codes_file)) {
     series_codes <- readRDS(series_codes_file)
   } else {
@@ -30,7 +34,7 @@ new_series_block <- function(series = "final", ...) {
       stringsAsFactors = FALSE
     )
   }
-  
+
   blockr.ts::new_ts_transform_block(
     server = function(id, data) {
       moduleServer(
@@ -38,12 +42,12 @@ new_series_block <- function(series = "final", ...) {
         function(input, output, session) {
           # Initialize reactive values with r_ prefix
           r_series <- reactiveVal(series)
-          
+
           # Create choices for selectize
           # Group by spec and format as "code - description"
           create_choices <- function() {
             choices_list <- list()
-            
+
             for (spec in unique(series_codes$spec)) {
               spec_data <- series_codes[series_codes$spec == spec, ]
               spec_choices <- setNames(
@@ -52,10 +56,10 @@ new_series_block <- function(series = "final", ...) {
               )
               choices_list[[spec]] <- spec_choices
             }
-            
+
             choices_list
           }
-          
+
           # Update selectize with choices
           observe({
             updateSelectizeInput(
@@ -66,12 +70,12 @@ new_series_block <- function(series = "final", ...) {
               server = FALSE
             )
           })
-          
+
           # Input observers
           observeEvent(input$series, {
             r_series(input$series)
           })
-          
+
           # Display selected series description
           output$series_description <- renderUI({
             selected <- r_series()
@@ -87,16 +91,17 @@ new_series_block <- function(series = "final", ...) {
                 ),
                 p(
                   class = "series-description-spec",
-                  "Category: ", tags$strong(series_info$spec[1])
+                  "Category: ",
+                  tags$strong(series_info$spec[1])
                 )
               )
             }
           })
-          
+
           list(
             expr = reactive({
               selected_series <- r_series()
-              
+
               # Use seasonal::series() for flexible extraction
               # It handles both standard components and X-13 series codes
               expr_text <- glue::glue(
@@ -108,7 +113,7 @@ new_series_block <- function(series = "final", ...) {
                   tsbox::ts_tbl(extracted)
                 }}"
               )
-              
+
               parse(text = expr_text)[[1]]
             }),
             state = list(
@@ -122,7 +127,7 @@ new_series_block <- function(series = "final", ...) {
       tagList(
         div(
           class = "series-block-container",
-          
+
           tags$style(HTML(
             "
             .series-block-container {
@@ -180,23 +185,24 @@ new_series_block <- function(series = "final", ...) {
             }
             "
           )),
-          
+
           div(
             class = "series-block-title",
             "Series Extraction"
           ),
-          
+
           selectizeInput(
             NS(id, "series"),
             label = "Select Series",
-            choices = NULL,  # Set in server
+            choices = NULL, # Set in server
             selected = series,
             width = "100%",
             options = list(
               placeholder = "Search by code or description...",
               searchField = c("label", "value"),
               maxOptions = 500,
-              render = I('{
+              render = I(
+                '{
                 option: function(item, escape) {
                   var label = item.label || item.value;
                   var parts = label.split(" - ");
@@ -211,13 +217,14 @@ new_series_block <- function(series = "final", ...) {
                 item: function(item, escape) {
                   return "<div>" + escape(item.value) + "</div>";
                 }
-              }')
+              }'
+              )
             )
           ),
-          
+
           # Display selected series description
           uiOutput(NS(id, "series_description")),
-          
+
           helpText(
             "Search and select from 260+ available X-13ARIMA-SEATS series. ",
             "Type to search by code (e.g., 'd11') or description (e.g., 'seasonal'). ",

@@ -1,6 +1,6 @@
 #' Final Series Block
 #'
-#' Extracts the seasonally adjusted series (and optionally the original series) 
+#' Extracts the seasonally adjusted series (and optionally the original series)
 #' from a seas model and displays it as a dygraph.
 #'
 #' @param include_original Logical. Include the original series alongside the adjusted series (default: TRUE)
@@ -15,16 +15,16 @@ new_final_block <- function(include_original = TRUE, ...) {
         function(input, output, session) {
           # Initialize reactive values with r_ prefix
           r_include_original <- reactiveVal(include_original)
-          
+
           # Input observers
           observeEvent(input$include_original, {
             r_include_original(input$include_original)
           })
-          
+
           list(
             expr = reactive({
               include_orig <- r_include_original()
-              
+
               if (include_orig) {
                 # Return both original and adjusted series
                 expr_text <- "
@@ -50,7 +50,7 @@ new_final_block <- function(include_original = TRUE, ...) {
                   tsbox::ts_tbl(adjusted)
                 }"
               }
-              
+
               parse(text = expr_text)[[1]]
             }),
             state = list(
@@ -64,7 +64,7 @@ new_final_block <- function(include_original = TRUE, ...) {
       tagList(
         div(
           class = "final-block-container",
-          
+
           tags$style(HTML(
             "
             .final-block-container {
@@ -80,18 +80,18 @@ new_final_block <- function(include_original = TRUE, ...) {
             }
             "
           )),
-          
+
           div(
             class = "final-block-title",
             "Seasonally Adjusted Series"
           ),
-          
+
           checkboxInput(
             NS(id, "include_original"),
             label = "Include original series",
             value = include_original
           ),
-          
+
           helpText(
             "Displays the seasonally adjusted series from the seasonal adjustment model.",
             "When checked, also shows the original series for comparison."
