@@ -264,34 +264,59 @@ new_seas_block <- function(
             # Height-adjustable ACE editor with embedded autocomplete
             setup_seas_ace_editor(
               NS(id, "seas_call"),
-              value = seas_call,
+              value = seas_call,  # Use original format
               height = "200px"
             ),
 
-            # Enhanced help text with examples
+            # Collapsible help text
             div(
-              class = "seas-help-text",
-              strong("💡 Tips:"),
-              br(),
-              "• Use ", tags$code("Ctrl+Space"), " for autocompletion",
-              br(),
-              "• Try: ", tags$code("transform.power = 0"), " for Box-Cox transformation",
-              br(),
-              "• Resize editor by dragging the bottom edge",
-
+              tags$a(
+                href = "#",
+                onclick = "toggleHelp(event)",
+                style = "text-decoration: none; color: #007bff; font-weight: 500;",
+                icon("info-circle"),
+                " Show Tips & Examples"
+              ),
               div(
-                class = "seas-examples",
+                id = NS(id, "help_content"),
+                class = "seas-help-text",
+                style = "display: none; margin-top: 8px;",
+                strong("💡 Tips:"),
                 br(),
-                strong("Common examples:"),
+                "• Use ", tags$code("Ctrl+Space"), " for autocompletion",
                 br(),
-                "Basic X-11: ", tags$code("seas(x = x, x11 = list())"),
+                "• Try: ", tags$code("transform.power = 0"), " for Box-Cox transformation",
                 br(),
-                "SEATS: ", tags$code("seas(x = x, seats = list())"),
-                br(),
-                "Multiplicative: ", tags$code("seas(x = x, x11 = list(mode = 'mult'))"),
-                br(),
-                "With transformation: ", tags$code("seas(x = x, transform.power = 0, x11 = list())")
-              )
+                "• Resize editor by dragging the bottom edge",
+
+                div(
+                  class = "seas-examples",
+                  br(),
+                  strong("Common examples:"),
+                  br(),
+                  "Basic X-11: ", tags$code("seas(x = x, x11 = list())"),
+                  br(),
+                  "SEATS: ", tags$code("seas(x = x)"),
+                  br(),
+                  "Multiplicative: ", tags$code("seas(x = x, transform.function = \"log\")"),
+                  br(),
+                  "ARIMA Model: ", tags$code("seas(x = x, arima.model = c(1, 0, 1, 1, 0, 1))")
+                )
+              ),
+              tags$script(HTML(sprintf("
+                function toggleHelp(event) {
+                  event.preventDefault();
+                  var content = document.getElementById('%s');
+                  var link = event.target.closest('a');
+                  if (content.style.display === 'none') {
+                    content.style.display = 'block';
+                    link.innerHTML = '<i class=\"fa fa-info-circle\"></i> Hide Tips & Examples';
+                  } else {
+                    content.style.display = 'none';
+                    link.innerHTML = '<i class=\"fa fa-info-circle\"></i> Show Tips & Examples';
+                  }
+                }
+              ", NS(id, "help_content"))))
             )
           ),
 

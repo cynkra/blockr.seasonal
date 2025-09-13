@@ -175,13 +175,16 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
     // Add custom key handler for parentheses positioning and resizing
     document.addEventListener("DOMContentLoaded", function() {
       setTimeout(function() {
-        var editor = ace.edit("%s");
+        var editorEl = document.getElementById("%s");
+        if (!editorEl) return;
+
+        var editor = ace.edit(editorEl);
         if (editor) {
+          // Position cursor inside list() parentheses
           editor.commands.on("afterExec", function(e) {
             if (e.command.name === "insertstring" || e.command.name === "Return") {
               var pos = editor.getCursorPosition();
               var line = editor.session.getLine(pos.row);
-              // Position cursor inside list() parentheses
               if (line.substring(pos.column - 6, pos.column) === "list()") {
                 editor.moveCursorTo(pos.row, pos.column - 1);
               }
@@ -221,25 +224,35 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
       }, 100);
     });
 
-    // Add completer when ACE is ready - more robust initialization
+    // Add completer when ACE is ready - simple pattern from blockr.dplyr
     (function addSeasCompleter(){
       if (typeof ace === "undefined") {
         setTimeout(addSeasCompleter, 100);
         return;
       }
       try {
-        // Ensure language_tools is loaded
         ace.require("ace/ext/language_tools").addCompleter(seasCompleter);
-        console.log("Seas completer added successfully");
+
+        // Enable autocomplete for the editor
+        setTimeout(function() {
+          var editorEl = document.getElementById("%s");
+          if (editorEl) {
+            var editor = ace.edit(editorEl);
+            editor.setOptions({
+              enableLiveAutocompletion: true,
+              enableBasicAutocompletion: true
+            });
+          }
+        }, 100);
       } catch(e) {
-        console.log("Waiting for ACE language tools...");
         setTimeout(addSeasCompleter, 100);
       }
     })();
   ',
     jsonlite::toJSON(get_seas_categories(), auto_unbox = TRUE),
-    id,
-    id
+    id,  # Line 178: getElementById for editor
+    id,  # Line 195: container ID for resizing
+    id   # Line 238: getElementById for autocomplete setup
   )
 
   tagList(
