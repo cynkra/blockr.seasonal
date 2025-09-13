@@ -321,8 +321,8 @@ format_seas_call <- function(code_text) {
     # Clean the input
     code_text <- trimws(as.character(code_text))
 
-    # Basic formatting for seas() calls
-    if (grepl("^seas\\s*\\(", code_text)) {
+    # Basic formatting for seas() calls (also handle seasonal::seas)
+    if (grepl("^(seasonal::)?seas\\s*\\(", code_text)) {
       # Remove extra whitespace
       code_text <- gsub("\\s+", " ", code_text)
 
@@ -354,6 +354,7 @@ format_seas_call <- function(code_text) {
         }
       }
 
+
       if (length(splits) > 0) {
         # Split the string at the comma positions
         parts <- character(0)
@@ -369,6 +370,7 @@ format_seas_call <- function(code_text) {
           last_part <- substr(code_text, start_pos, nchar(code_text))
           parts <- c(parts, trimws(last_part))
         }
+
 
         # Reconstruct with proper formatting
         if (length(parts) > 1) {
@@ -393,6 +395,7 @@ format_seas_call <- function(code_text) {
             }
           }
 
+
           # Build final result
           if (grepl("\\)\\s*$", parts[length(parts)])) {
             # Has closing parenthesis
@@ -409,7 +412,7 @@ format_seas_call <- function(code_text) {
             )
           }
 
-          result
+          return(result)
         }
       }
     }
