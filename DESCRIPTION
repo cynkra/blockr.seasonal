@@ -20,7 +20,10 @@ Imports:
     blockr.ts,
     tibble,
     glue,
-    seasonal
+    seasonal,
+    shinyjs,
+    jsonlite,
+    htmltools
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
