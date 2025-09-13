@@ -526,7 +526,7 @@ html_summary <- function(seas_model, session = NULL) {
           actionLink(
             session$ns("x13_output"),
             label = tagList(
-              icon("file-text-o"),
+              icon("file-alt"),
               "X-13 Output"
             ),
             class = "seas-x13-link"
