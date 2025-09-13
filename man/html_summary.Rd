@@ -4,10 +4,12 @@
 \alias{html_summary}
 \title{Generate HTML summary for seas model (main function)}
 \usage{
-html_summary(seas_model)
+html_summary(seas_model, session = NULL)
 }
 \arguments{
 \item{seas_model}{A seas model object}
+
+\item{session}{Optional session object for adding button functionality}
 }
 \value{
 A tagList with HTML content

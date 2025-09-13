@@ -65,6 +65,7 @@ serve(
       series = new_series_block(            # Extract components
         component = "trend"
       ),
+      models = new_fivebestmdl_block(),    # Five best ARIMA models
       udg = new_udg_block(),                # X-13 statistics via udg()
       summary = new_summary_block()        # Enhanced model summary
     ),
@@ -75,6 +76,7 @@ serve(
       new_link("seas", "final"),
       new_link("seas", "month"),
       new_link("seas", "series"),
+      new_link("seas", "models"),
       new_link("seas", "udg"),
       new_link("seas", "summary")
     )
