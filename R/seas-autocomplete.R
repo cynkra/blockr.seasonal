@@ -2,44 +2,86 @@
 #' @noRd
 get_seas_categories <- function() {
   list(
-    # Common parameter combinations
+    # Most common complete patterns - ready to use
     common_patterns = c(
       'x11 = list()',
       'seats = list()',
       'transform.function = "log"',
       'transform.function = "auto"',
-      'transform.power = 0',
       'regression.variables = c("td")',
       'regression.variables = c("td", "easter[8]")',
+      'regression.variables = c("td", "easter[8]", "outlier")',
       'regression.aictest = c("td", "easter")',
       'arima.model = "(0 1 1)(0 1 1)"',
-      'arima.model = c(0, 1, 1, 0, 1, 1)',
-      'outlier.types = c("ao", "ls")',
+      'arima.model = "(0 1 1)(0 1 1)12"',
       'outlier.types = c("ao", "ls", "tc")',
+      'outlier.types = c("ao", "ls")',
+      'outlier.critical = 3',
+      'outlier.critical = 3.5',
+      'outlier.critical = 4',
       'forecast.maxlead = 12',
       'forecast.maxlead = 24',
-      'x11.seasonalma = "S3X9"',
-      'x11.trendma = 23'
+      'forecast.maxback = 12',
+      'x11.seasonalma = "s3x9"',
+      'x11.seasonalma = "msr"',
+      'x11.trendma = 13',
+      'x11.trendma = 23',
+      'x11.mode = "mult"',
+      'x11.mode = "add"',
+      'x11.mode = "pseudoadd"',
+      'x11.mode = "logadd"',
+      'check.maxlag = 24',
+      'estimate.tol = 1e-5',
+      'transform.power = 0',
+      'transform.power = 0.5',
+      'transform.adjust = "lom"',
+      'transform.adjust = "lpyear"'
     ),
 
-    # Main parameters (most common)
-    main_params = c(
-      "x", "xreg", "transform.function", "regression.variables",
-      "regression.aictest", "outlier", "outlier.types", "arima.model",
-      "x11", "seats", "forecast.maxlead", "na.action"
+    # Main specs (most commonly used)
+    main_specs = c(
+      "x11", "seats", "transform.function", "regression.variables",
+      "regression.aictest", "outlier", "outlier.types", "outlier.critical",
+      "arima.model", "forecast.maxlead", "forecast.maxback", "automdl", "check"
     ),
 
-    # X-11 specifications
+    # Transform spec arguments
+    transform_spec = c(
+      "transform.function", "transform.power", "transform.adjust",
+      "transform.aicdiff", "transform.mode", "transform.data",
+      "transform.file", "transform.format", "transform.name",
+      "transform.precision", "transform.start", "transform.title",
+      "transform.type", "transform.print", "transform.save"
+    ),
+
+    # Regression spec arguments
+    regression_spec = c(
+      "regression.variables", "regression.aictest", "regression.aicdiff",
+      "regression.user", "regression.usertype", "regression.data",
+      "regression.file", "regression.format", "regression.start",
+      "regression.chi2test", "regression.chi2testcv", "regression.tlimit",
+      "regression.print", "regression.save", "regression.savelog"
+    ),
+
+    # X11 spec arguments
     x11_spec = c(
       "x11.mode", "x11.seasonalma", "x11.trendma", "x11.sigmalim",
-      "x11.appendfcst", "x11.appendbcst", "x11.calendarsigma",
-      "x11.final", "x11.type"
+      "x11.appendfcst", "x11.appendbcst", "x11.final", "x11.title",
+      "x11.print", "x11.save", "x11.savelog", "x11.calendarsigma",
+      "x11.excludefcst", "x11.type", "x11.sfshort"
     ),
 
-    # SEATS specifications
+    # SEATS spec arguments
     seats_spec = c(
       "seats.noadmiss", "seats.appendfcst", "seats.appendbcst",
-      "seats.finite", "seats.hpcycle", "seats.qmax", "seats.rmod"
+      "seats.finite", "seats.hpcycle", "seats.qmax", "seats.rmod",
+      "seats.out", "seats.print", "seats.save", "seats.savelog",
+      "seats.statseas", "seats.tabtables", "seats.bias"
+    ),
+
+    # ARIMA spec arguments
+    arima_spec = c(
+      "arima.model", "arima.ar", "arima.ma", "arima.title"
     ),
 
     # Transform values (with quotes for strings)
@@ -49,26 +91,94 @@ get_seas_categories <- function() {
 
     # ARIMA model examples (common specifications)
     arima_examples = c(
-      '"(0 1 1)(0 1 1)"', '"(1 1 0)(0 1 1)"', '"(0 1 2)(0 1 1)"',
-      '"(2 1 0)(0 1 1)"', '"(1 1 1)(0 1 1)"', '"(0 1 1)(0 1 1)12"'
+      '"(0 1 1)(0 1 1)"', '"(0 1 1)(0 1 1)12"', '"(1 1 0)(0 1 1)"',
+      '"(0 1 2)(0 1 1)"', '"(2 1 0)(0 1 1)"', '"(1 1 1)(0 1 1)"',
+      '"(0 1 1)(0 1 1)4"', '"(1 0 0)(0 1 1)"', '"(0 1 1)(1 0 0)"',
+      '"(0 1 1)"', '"(1 0 1)"', '"(2 1 2)"'
     ),
 
-    # Regression variables (from Census documentation)
+    # Regression variables (predefined, from Census documentation)
     regression_vars = c(
-      '"td"', '"easter[1]"', '"easter[8]"', '"easter[15]"',
-      '"tdnolpyear"', '"tl"', '"ao"', '"ls"', '"tc"',
-      '"seasonal"', '"const"', '"lom"', '"loq"', '"lpyear"',
-      '"thank"', '"labor"', '"sceaster"', '"easterstock"'
+      '"const"', '"seasonal"', '"sincos"',
+      '"td"', '"tdnolpyear"', '"tdstock"', '"td1coef"', '"td1nolpyear"', '"tdstock1coef"',
+      '"lom"', '"loq"', '"lpyear"',
+      '"easter[1]"', '"easter[8]"', '"easter[15]"',
+      '"sceaster[1]"', '"sceaster[8]"',
+      '"easterstock[1]"', '"easterstock[8]"',
+      '"labor[1]"', '"labor[8]"', '"labor[15]"',
+      '"thank[1]"', '"thank[8]"',
+      '"ao"', '"ls"', '"tc"', '"so"', '"rp"', '"tl"',
+      '"outlier"'
     ),
 
-    # Outlier types (with quotes)
+    # Outlier type values (quoted)
     outlier_values = c(
-      '"ao"', '"ls"', '"tc"', '"so"', '"rp"', '"tl"'
+      '"ao"', '"ls"', '"tc"', '"so"', '"rp"', '"tl"', '"all"'
     ),
 
     # X11 seasonal moving average options
     x11_seasonalma_values = c(
-      '"S3X3"', '"S3X5"', '"S3X9"', '"S3X15"', '"Msr"', '"Stable"'
+      '"s3x3"', '"s3x5"', '"s3x9"', '"s3x15"', '"msr"', '"stable"',
+      '"x11default"', '"s3x1"', '"s3x3x3"', '"s3x3x5"', '"s3x3x9"'
+    ),
+
+    # Outlier critical values (common thresholds)
+    outlier_critical_values = c(
+      '3', '3.5', '4', '4.5', '5', '2.5', '2.8', '3.2', '3.8'
+    ),
+
+    # Automdl maxorder values
+    automdl_maxorder_values = c(
+      '(2 1)', '(3 1)', '(4 1)', '(2 2)', '(3 2)', '(4 2)'
+    ),
+
+    # Automdl maxdiff values
+    automdl_maxdiff_values = c(
+      '(1 0)', '(1 1)', '(2 0)', '(2 1)'
+    ),
+
+    # Check qtype values
+    check_qtype_values = c(
+      '"ljungbox"', '"boxpierce"'
+    ),
+
+    # Estimate exact values
+    estimate_exact_values = c(
+      '"arma"', '"ma"', '"none"', '"all"'
+    ),
+
+    # History estimates values
+    history_estimates_values = c(
+      '"fcst"', '"concurrent"', '"trend"', '"seasonal"', '"sadjchng"',
+      '"trendchng"', '"seasadj"', '"aic"', '"sadj"', '"ratio"'
+    ),
+
+    # Spectrum series values
+    spectrum_series_values = c(
+      '"original"', '"seasonaladj"', '"irregular"', '"residual"',
+      '"regresidual"', '"irreg"', '"res"', '"rsd"'
+    ),
+
+    # Series period values
+    series_period_values = c(
+      '1', '2', '4', '12', '52'
+    ),
+
+    # Common numeric values
+    numeric_values = c(
+      '0', '0.5', '1', '2', '3', '3.5', '4', '4.5', '5', '6', '7', '8',
+      '9', '10', '11', '12', '13', '15', '20', '23', '24',
+      '36', '48', '60', '120'
+    ),
+
+    # Boolean values
+    boolean_values = c(
+      'TRUE', 'FALSE', 'T', 'F'
+    ),
+
+    # Helper functions
+    helper_functions = c(
+      'list()', 'c()'
     ),
 
     # X11 mode options
@@ -76,20 +186,121 @@ get_seas_categories <- function() {
       '"mult"', '"add"', '"pseudoadd"', '"logadd"'
     ),
 
-    # Automdl parameters
+    # Automdl spec arguments
     automdl_spec = c(
-      "automdl", "automdl.maxorder", "automdl.maxdiff",
-      "automdl.ljungboxlimit", "automdl.reduce", "automdl.acceptdefault"
+      "automdl.maxorder", "automdl.maxdiff", "automdl.diff",
+      "automdl.acceptdefault", "automdl.checkmu", "automdl.ljungboxlimit",
+      "automdl.mixed", "automdl.balanced", "automdl.exactdiff",
+      "automdl.fcstlim", "automdl.hrinitial", "automdl.reducecv",
+      "automdl.rejectfcst", "automdl.urfinal", "automdl.armalimit",
+      "automdl.print", "automdl.savelog"
     ),
 
-    # Forecast parameters
+    # Outlier spec arguments
+    outlier_spec = c(
+      "outlier.types", "outlier.critical", "outlier.span", "outlier.method",
+      "outlier.lsrun", "outlier.print", "outlier.save", "outlier.savelog",
+      "outlier.tcrate"
+    ),
+
+    # Forecast spec arguments
     forecast_spec = c(
-      "forecast.maxback", "forecast.probability", "forecast.save"
+      "forecast.maxlead", "forecast.maxback", "forecast.probability",
+      "forecast.exclude", "forecast.print", "forecast.save"
     ),
 
-    # Check parameters
+    # Check spec arguments
     check_spec = c(
-      "check.maxlag", "check.print", "check.qtype", "check.save"
+      "check.maxlag", "check.print", "check.save", "check.qtype",
+      "check.acflimit", "check.qlimit", "check.savelog"
+    ),
+
+    # Estimate spec arguments
+    estimate_spec = c(
+      "estimate.tol", "estimate.maxiter", "estimate.exact",
+      "estimate.outofsample", "estimate.print", "estimate.save",
+      "estimate.savelog", "estimate.file"
+    ),
+
+    # Series spec arguments
+    series_spec = c(
+      "series.data", "series.file", "series.format", "series.period",
+      "series.start", "series.span", "series.title", "series.name",
+      "series.decimals", "series.modelspan", "series.comptype",
+      "series.compwt", "series.appendbcst", "series.appendfcst",
+      "series.type", "series.divpower", "series.missingcode",
+      "series.missingval", "series.save", "series.print", "series.savelog"
+    ),
+
+    # History spec arguments
+    history_spec = c(
+      "history.estimates", "history.fixmdl", "history.fixreg",
+      "history.outlier", "history.sadjlags", "history.trendlags",
+      "history.start", "history.target", "history.fixx11reg",
+      "history.print", "history.save", "history.savelog"
+    ),
+
+    # Slidingspans spec arguments
+    slidingspans_spec = c(
+      "slidingspans.fixmdl", "slidingspans.fixreg", "slidingspans.length",
+      "slidingspans.numspans", "slidingspans.outlier", "slidingspans.start",
+      "slidingspans.additivesa", "slidingspans.cutat", "slidingspans.cutchng",
+      "slidingspans.cuttd", "slidingspans.print", "slidingspans.save",
+      "slidingspans.savelog"
+    ),
+
+    # Spectrum spec arguments
+    spectrum_spec = c(
+      "spectrum.start", "spectrum.print", "spectrum.save", "spectrum.savelog",
+      "spectrum.series", "spectrum.type", "spectrum.qcheck",
+      "spectrum.logqs", "spectrum.tukey.m"
+    ),
+
+    # Force spec arguments
+    force_spec = c(
+      "force.start", "force.round", "force.lambda", "force.mode",
+      "force.type", "force.target", "force.usefcst", "force.print",
+      "force.save"
+    ),
+
+    # Identify spec arguments
+    identify_spec = c(
+      "identify.diff", "identify.sdiff", "identify.maxlag",
+      "identify.print", "identify.save"
+    ),
+
+    # Pickmdl spec arguments
+    pickmdl_spec = c(
+      "pickmdl.mode", "pickmdl.method", "pickmdl.fcstlim",
+      "pickmdl.qlim", "pickmdl.bcstlim", "pickmdl.identify",
+      "pickmdl.outofsample", "pickmdl.print", "pickmdl.savelog",
+      "pickmdl.file"
+    ),
+
+    # Composite spec arguments
+    composite_spec = c(
+      "composite.title", "composite.decimals", "composite.modelspan",
+      "composite.type", "composite.name", "composite.appendbcst",
+      "composite.appendfcst", "composite.print", "composite.save",
+      "composite.savelog"
+    ),
+
+    # Metadata spec arguments
+    metadata_spec = c(
+      "metadata.keys", "metadata.values"
+    ),
+
+    # X11regression spec arguments
+    x11regression_spec = c(
+      "x11regression.variables", "x11regression.user", "x11regression.usertype",
+      "x11regression.data", "x11regression.file", "x11regression.format",
+      "x11regression.start", "x11regression.span", "x11regression.aictest",
+      "x11regression.prior", "x11regression.b", "x11regression.centeruser",
+      "x11regression.eastermeans", "x11regression.noapply", "x11regression.print",
+      "x11regression.save", "x11regression.savelog", "x11regression.sigma",
+      "x11regression.forcecal", "x11regression.critical", "x11regression.outlierspan",
+      "x11regression.outliermethod", "x11regression.reweight", "x11regression.tdprior",
+      "x11regression.umfile"
     )
   )
 }
@@ -123,28 +334,37 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
 
             // Special handling for different categories
             if (category === "common_patterns") {
-              // Common patterns - high priority
+              // Common patterns - highest priority
               meta = "pattern";
-              score = 1400;
-            } else if (category === "main_params") {
-              // Main parameters - add " = " suffix
+              score = 1500;
+            } else if (category === "main_specs") {
+              // Main specs - high priority, add " = " suffix
               value = item + " = ";
-              meta = "parameter";
-              score = 1300;
+              meta = "main spec";
+              score = 1400;
             } else if (category.endsWith("_spec")) {
               // Specification parameters - add " = " suffix
               value = item + " = ";
               meta = category.replace("_spec", "");
-              score = 1100;
+              score = 1200;
             } else if (category.endsWith("_values") || category.endsWith("_examples") ||
                        category.endsWith("_vars")) {
               // Values are already quoted in the list
               meta = "value";
               score = 1000;
+            } else if (category === "helper_functions") {
+              meta = "function";
+              score = 1100;
+            } else if (category === "numeric_values") {
+              meta = "number";
+              score = 900;
+            } else if (category === "boolean_values") {
+              meta = "boolean";
+              score = 900;
             } else {
               // Default handling
               meta = "option";
-              score = 900;
+              score = 800;
             }
 
             wordList.push({
