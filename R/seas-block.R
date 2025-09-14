@@ -29,7 +29,7 @@ new_seas_block <- function(
   ...
 ) {
   blockr.core::new_transform_block(
-    server = function(id, x, xreg = NULL, xtrans = NULL) {
+    server = function(id, x, xreg = reactive(NULL), xtrans = reactive(NULL)) {
       # Named inputs: x (required), xreg and xtrans (optional)
       moduleServer(
         id,
@@ -55,7 +55,7 @@ new_seas_block <- function(
             }
 
             # Create expression that converts inputs and evaluates seas
-            # Only include xreg/xtrans assignments if they are provided
+            # Only include xreg/xtrans assignments if they are provided (not NULL)
             xreg_assignment <- if (!is.null(xreg())) {
               "xreg <- tsbox::ts_ts(xreg)"
             } else {

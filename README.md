@@ -274,6 +274,31 @@ serve(
 )
 ```
 
+### Using External Regressors
+
+```r
+library(blockr.core)
+library(blockr.seasonal)
+
+# Prepare data with Chinese New Year regressor
+air_data <- tsbox::ts_tbl(datasets::AirPassengers)
+cny_regressor <- tsbox::ts_tbl(
+  seasonal::genhol(seasonal::cny, start = 0, end = 6, center = "calendar")
+)
+
+# Seasonal adjustment with external regressor
+# Both x and xreg are automatically converted to ts format inside the block
+blockr.core::serve(
+  new_seas_block(
+    seas_call = "seas(x = x, xreg = xreg, regression.variables = 'td')"
+  ),
+  data = list(
+    x = air_data,
+    xreg = cny_regressor
+  )
+)
+```
+
 ## Dependencies
 
 - `seasonal`: Core seasonal adjustment functionality (X-13ARIMA-SEATS)
