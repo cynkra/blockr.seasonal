@@ -16,3 +16,13 @@ Performs seasonal adjustment using X-13ARIMA-SEATS via the seasonal package.
 This block introduces a novel pattern in blockr: returning a statistical model
 object rather than data, enabling downstream blocks to consume the model.
 }
+\details{
+Features:
+\itemize{
+\item Height-adjustable ACE editor with resizing handle
+\item Comprehensive autocomplete for seas() parameters and values
+\item Submit button with validation (changes applied only on submit)
+\item Enhanced syntax highlighting for R code
+\item Error handling with user-friendly notifications
+}
+}

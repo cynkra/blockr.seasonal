@@ -4,14 +4,16 @@
 \alias{new_final_block}
 \title{Final Series Block}
 \usage{
-new_final_block(include_original = TRUE, ...)
+new_final_block(include_original = TRUE, show_outliers = TRUE, ...)
 }
 \arguments{
 \item{include_original}{Logical. Include the original series alongside the adjusted series (default: TRUE)}
+
+\item{show_outliers}{Logical. Display outlier annotations on the plot (default: TRUE)}
 
 \item{...}{Additional arguments passed to new_ts_transform_block}
 }
 \description{
 Extracts the seasonally adjusted series (and optionally the original series)
-from a seas model and displays it as a dygraph.
+from a seas model and displays it as a dygraph with outlier annotations.
 }

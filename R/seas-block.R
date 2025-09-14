@@ -37,31 +37,6 @@ new_seas_block <- function(
             initialize_seas_ace_editor(session)
           })
 
-          # Format button observer
-          observeEvent(input$format, {
-            current_code <- input$seas_call %||% ""
-            formatted_code <- format_seas_call(current_code)
-
-            if (formatted_code != current_code) {
-              shinyAce::updateAceEditor(
-                session,
-                "seas_call",
-                value = formatted_code
-              )
-
-              showNotification(
-                "Code formatted with one argument per line",
-                type = "message",
-                duration = 2
-              )
-            } else {
-              showNotification(
-                "Code is already well formatted",
-                type = "message",
-                duration = 2
-              )
-            }
-          })
 
           # Parse and validate seas call
           parse_seas_call <- function(call_text) {
@@ -137,10 +112,24 @@ new_seas_block <- function(
             })
           }
 
-          # Submit button observer
+          # Submit button observer - format and apply
           observeEvent(input$submit, {
             call_text <- input$seas_call %||% ""
-            apply_seas_call(call_text)
+
+            # Format the code first
+            formatted_code <- format_seas_call(call_text)
+
+            # Update the editor with formatted code if it changed
+            if (formatted_code != call_text) {
+              shinyAce::updateAceEditor(
+                session,
+                "seas_call",
+                value = formatted_code
+              )
+            }
+
+            # Apply the formatted code
+            apply_seas_call(formatted_code)
           })
 
           list(
@@ -184,15 +173,41 @@ new_seas_block <- function(
               font-weight: 600;
             }
 
-            .seas-help-text {
-              margin-top: 12px;
-              padding: 12px;
-              background: #e3f2fd;
-              border-left: 4px solid #2196f3;
-              border-radius: 4px;
-              font-size: 13px;
-              color: #1565c0;
-              line-height: 1.5;
+            .custom-dropdown-menu {
+              max-height: 400px;
+              overflow-y: auto;
+              min-width: 250px;
+            }
+
+            .dropdown-header {
+              font-weight: 600;
+              color: #495057;
+              padding: 4px 16px;
+              margin-top: 4px;
+            }
+
+            .dropdown-item {
+              display: block;
+              padding: 6px 16px;
+              font-size: 14px;
+              color: #212529;
+              text-decoration: none;
+              white-space: nowrap;
+              cursor: pointer;
+            }
+
+            .dropdown-item:hover {
+              background-color: #f8f9fa;
+              color: #16181b;
+            }
+
+            .btn-outline-secondary {
+              border-color: #6c757d;
+            }
+
+            .btn-outline-secondary:hover {
+              background-color: #6c757d;
+              color: white;
             }
 
             .seas-submit-section {
@@ -215,41 +230,6 @@ new_seas_block <- function(
               transform: translateY(-1px);
             }
 
-            .btn-seas-format {
-              border: 2px solid #007bff;
-              color: #007bff;
-              padding: 10px 20px;
-              font-weight: 500;
-              transition: all 0.2s;
-            }
-
-            .btn-seas-format:hover {
-              background: #007bff;
-              color: white;
-              transform: translateY(-1px);
-            }
-
-            .btn-group .btn {
-              border-radius: 6px;
-              margin-right: 10px;
-            }
-
-            .btn-group .btn:last-child {
-              margin-right: 0;
-            }
-
-            .seas-examples {
-              margin-top: 8px;
-              font-size: 12px;
-              color: #6c757d;
-            }
-
-            .seas-examples code {
-              background: #f1f3f4;
-              padding: 2px 4px;
-              border-radius: 3px;
-              font-family: 'Monaco', 'Consolas', monospace;
-            }
             "
           )),
 
@@ -268,81 +248,276 @@ new_seas_block <- function(
               height = "260px"  # Increased by ~3 lines (20px per line)
             ),
 
-            # Collapsible help text
+            # Examples dropdown and help
             div(
-              tags$a(
-                href = "#",
-                onclick = "toggleHelp(event)",
-                style = "text-decoration: none; color: #007bff; font-weight: 500;",
-                icon("info-circle"),
-                " Show Tips & Examples"
-              ),
-              div(
-                id = NS(id, "help_content"),
-                class = "seas-help-text",
-                style = "display: none; margin-top: 8px;",
-                strong("💡 Tips:"),
-                br(),
-                "• Use ", tags$code("Ctrl+Space"), " for autocompletion",
-                br(),
-                "• Try: ", tags$code("transform.power = 0"), " for Box-Cox transformation",
-                br(),
-                "• Resize editor by dragging the bottom edge",
+              style = "margin-top: 10px; position: relative;",
 
+              # Custom dropdown menu for examples
+              div(
+                style = "display: inline-block; margin-right: 15px; position: relative;",
+                tags$button(
+                  class = "btn btn-outline-secondary",
+                  type = "button",
+                  id = NS(id, "examplesDropdown"),
+                  onclick = sprintf("toggleExamplesDropdown('%s')", NS(id, "examplesMenu")),
+                  style = "display: flex; align-items: center; gap: 5px;",
+                  icon("lightbulb"),
+                  " Insert Example ",
+                  tags$span(style = "font-size: 12px;", "▼")
+                ),
                 div(
-                  class = "seas-examples",
-                  br(),
-                  strong("Common examples:"),
-                  br(),
-                  "Basic X-11: ", tags$code("seas(x = x, x11 = list())"),
-                  br(),
-                  "SEATS: ", tags$code("seas(x = x)"),
-                  br(),
-                  "Multiplicative: ", tags$code("seas(x = x, transform.function = \"log\")"),
-                  br(),
-                  "ARIMA Model: ", tags$code("seas(x = x, arima.model = c(1, 0, 1, 1, 0, 1))")
+                  id = NS(id, "examplesMenu"),
+                  class = "custom-dropdown-menu",
+                  style = "display: none; position: absolute; top: 100%; left: 0; z-index: 1000; background: white; border: 1px solid #dee2e6; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 2px;",
+
+                  # Basic models
+                  h6(class = "dropdown-header", "Basic Models"),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, x11 = list())'); return false;", NS(id, "seas_call")),
+                    "X-11 Adjustment"
+                  ),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x)'); return false;", NS(id, "seas_call")),
+                    "SEATS (default)"
+                  ),
+
+                  div(class = "dropdown-divider", style = "margin: 0; border-top: 1px solid #dee2e6;"),
+
+                  # Transformations
+                  h6(class = "dropdown-header", "Transformations"),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, transform.function = \"log\")'); return false;", NS(id, "seas_call")),
+                    "Log transformation"
+                  ),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, transform.power = 0)'); return false;", NS(id, "seas_call")),
+                    "Box-Cox (auto λ)"
+                  ),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, transform.function = \"auto\")'); return false;", NS(id, "seas_call")),
+                    "Auto transformation"
+                  ),
+
+                  div(class = "dropdown-divider", style = "margin: 0; border-top: 1px solid #dee2e6;"),
+
+                  # ARIMA models
+                  h6(class = "dropdown-header", "ARIMA Models"),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, arima.model = \"(0 1 1)(0 1 1)\")'); return false;", NS(id, "seas_call")),
+                    "Airline model"
+                  ),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, arima.model = \"(1 1 0)(0 1 1)\")'); return false;", NS(id, "seas_call")),
+                    "ARIMA (1,1,0)(0,1,1)"
+                  ),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, automdl = list())'); return false;", NS(id, "seas_call")),
+                    "Auto ARIMA selection"
+                  ),
+
+                  div(class = "dropdown-divider", style = "margin: 0; border-top: 1px solid #dee2e6;"),
+
+                  # Advanced
+                  h6(class = "dropdown-header", "Advanced Options"),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, regression.variables = c(\"td\", \"easter[8]\"))'); return false;", NS(id, "seas_call")),
+                    "Trading days & Easter"
+                  ),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, outlier.types = c(\"ao\", \"ls\", \"tc\"))'); return false;", NS(id, "seas_call")),
+                    "Outlier detection"
+                  ),
+                  tags$a(
+                    class = "dropdown-item seas-example-item",
+                    href = "#",
+                    onclick = sprintf("insertExample('%s', 'seas(x = x, forecast.maxlead = 24)'); return false;", NS(id, "seas_call")),
+                    "24-month forecast"
+                  )
                 )
               ),
-              tags$script(HTML(sprintf("
-                function toggleHelp(event) {
-                  event.preventDefault();
-                  var content = document.getElementById('%s');
-                  var link = event.target.closest('a');
-                  if (content.style.display === 'none') {
-                    content.style.display = 'block';
-                    link.innerHTML = '<i class=\"fa fa-info-circle\"></i> Hide Tips & Examples';
-                  } else {
-                    content.style.display = 'none';
-                    link.innerHTML = '<i class=\"fa fa-info-circle\"></i> Show Tips & Examples';
+
+              # Inline help text
+              span(
+                class = "text-muted small",
+                style = "line-height: 32px;",
+                tags$code("Ctrl+Space"), ": autocomplete | ",
+                "Drag bottom edge to resize editor"
+              ),
+
+              # JavaScript for dropdown and inserting examples
+              tags$script(HTML("
+                function toggleExamplesDropdown(menuId) {
+                  var menu = document.getElementById(menuId);
+                  if (menu) {
+                    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
                   }
                 }
-              ", NS(id, "help_content"))))
+
+                function formatSeasCall(code_text) {
+                  // Port of R's format_seas_call function
+                  if (!code_text || code_text.trim() === '') {
+                    return code_text || '';
+                  }
+
+                  try {
+                    code_text = code_text.trim();
+
+                    // Basic formatting for seas() calls
+                    if (/^(seasonal::)?seas\\s*\\(/.test(code_text)) {
+                      // Remove extra whitespace
+                      code_text = code_text.replace(/\\s+/g, ' ');
+
+                      // Split on commas that are not inside nested parentheses or quotes
+                      var chars = code_text.split('');
+                      var paren_level = 0;
+                      var in_quotes = false;
+                      var quote_char = '';
+                      var splits = [];
+
+                      for (var i = 0; i < chars.length; i++) {
+                        var char = chars[i];
+
+                        if (!in_quotes && (char === '\"' || char === \"'\")) {
+                          in_quotes = true;
+                          quote_char = char;
+                        } else if (in_quotes && char === quote_char && (i === 0 || chars[i - 1] !== '\\\\')) {
+                          in_quotes = false;
+                          quote_char = '';
+                        } else if (!in_quotes) {
+                          if (char === '(') {
+                            paren_level++;
+                          } else if (char === ')') {
+                            paren_level--;
+                          } else if (char === ',' && paren_level === 1) {
+                            // Found a top-level comma in seas()
+                            splits.push(i);
+                          }
+                        }
+                      }
+
+                      if (splits.length > 0) {
+                        // Split the string at the comma positions
+                        var parts = [];
+                        var start_pos = 0;
+
+                        for (var j = 0; j < splits.length; j++) {
+                          var split_pos = splits[j];
+                          var part = code_text.substring(start_pos, split_pos);
+                          parts.push(part.trim());
+                          start_pos = split_pos + 1;
+                        }
+                        // Add the last part
+                        if (start_pos < code_text.length) {
+                          var last_part = code_text.substring(start_pos);
+                          parts.push(last_part.trim());
+                        }
+
+                        // Reconstruct with proper formatting
+                        if (parts.length > 1) {
+                          var first_part = parts[0];  // 'seas(x = x'
+
+                          // Build list of formatted arguments (all except first)
+                          var formatted_args = [];
+
+                          // Process all arguments except the first
+                          for (var k = 1; k < parts.length; k++) {
+                            var part = parts[k];
+                            // Check if this is the last part and has closing parenthesis
+                            if (k === parts.length - 1 && /\\)\\s*$/.test(part)) {
+                              // Remove closing parenthesis from the argument
+                              var arg = part.replace(/\\)\\s*$/, '').trim();
+                              if (arg.length > 0) {
+                                formatted_args.push('  ' + arg);
+                              }
+                            } else {
+                              // Regular argument
+                              formatted_args.push('  ' + part.trim());
+                            }
+                          }
+
+                          // Build final result
+                          if (/\\)\\s*$/.test(parts[parts.length - 1])) {
+                            // Has closing parenthesis
+                            return first_part + ',\\n' + formatted_args.join(',\\n') + '\\n)';
+                          } else {
+                            // No closing parenthesis
+                            return first_part + ',\\n' + formatted_args.join(',\\n');
+                          }
+                        }
+                      }
+                    }
+
+                    // If no formatting needed or failed, return original
+                    return code_text;
+                  } catch(e) {
+                    // If formatting fails, return original
+                    return code_text || '';
+                  }
+                }
+
+                function insertExample(editorId, example) {
+                  var editorEl = document.getElementById(editorId);
+                  if (editorEl) {
+                    var editor = ace.edit(editorEl);
+                    // Format the example using the same logic as R
+                    var formattedExample = formatSeasCall(example);
+                    editor.setValue(formattedExample);
+                    editor.clearSelection();
+                    editor.focus();
+                  }
+                  // Close dropdown
+                  var dropdowns = document.querySelectorAll('.custom-dropdown-menu');
+                  dropdowns.forEach(function(dd) {
+                    dd.style.display = 'none';
+                  });
+                }
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                  if (!e.target.closest('.btn-outline-secondary') && !e.target.closest('.custom-dropdown-menu')) {
+                    var dropdowns = document.querySelectorAll('.custom-dropdown-menu');
+                    dropdowns.forEach(function(dd) {
+                      dd.style.display = 'none';
+                    });
+                  }
+                });
+              "))
             )
           ),
 
           # Submit button section
           div(
             class = "seas-submit-section",
-            div(
-              class = "btn-group",
-              role = "group",
-              actionButton(
-                NS(id, "format"),
-                "Format Code",
-                icon = icon("indent"),
-                class = "btn btn-outline-primary btn-seas-format"
-              ),
-              actionButton(
-                NS(id, "submit"),
-                "Apply Changes",
-                icon = icon("paper-plane"),
-                class = "btn btn-success btn-seas-submit"
-              )
+            actionButton(
+              NS(id, "submit"),
+              "Apply Changes",
+              icon = icon("paper-plane"),
+              class = "btn btn-success btn-seas-submit"
             ),
             br(),
             div(
               class = "small text-muted mt-2",
-              "Use ", strong("Format Code"), " to organize arguments (one per line), then ", strong("Apply Changes"), " to update the model"
+              "Click to format and apply your seasonal adjustment specification"
             )
           )
         )
