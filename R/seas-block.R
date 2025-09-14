@@ -93,6 +93,43 @@ new_seas_block <- function(
             }
           })
 
+          # Generate static specification
+          generate_static <- function() {
+            current_call <- input$seas_call %||% r_seas_call_validated()
+
+            tryCatch({
+              # Generate the static specification
+              static_call <- generate_static_seas_call(
+                seas_call = current_call,
+                x = x(),
+                xreg = xreg(),
+                xtrans = xtrans()
+              )
+
+              # Update the editor with the static call
+              shinyAce::updateAceEditor(
+                session,
+                "seas_call",
+                value = static_call
+              )
+
+              # Also update the reactive values
+              r_seas_call(static_call)
+
+              showNotification(
+                "Generated static specification",
+                type = "message",
+                duration = 3
+              )
+            }, error = function(e) {
+              showNotification(
+                paste("Error:", e$message),
+                type = "error",
+                duration = 5
+              )
+            })
+          }
+
           # Apply changes when submit button is clicked
           apply_seas_call <- function(call_text) {
             if (identical(trimws(call_text), "")) {
@@ -154,6 +191,11 @@ new_seas_block <- function(
 
             # Apply the formatted code
             apply_seas_call(formatted_code)
+          })
+
+          # Generate static button observer
+          observeEvent(input$generate_static, {
+            generate_static()
           })
 
           list(
@@ -280,7 +322,7 @@ new_seas_block <- function(
 
               # Custom dropdown menu for examples
               div(
-                style = "display: inline-block; margin-right: 15px; position: relative;",
+                style = "display: inline-block; margin-right: 10px; position: relative;",
                 tags$button(
                   class = "btn btn-outline-secondary",
                   type = "button",
@@ -379,6 +421,17 @@ new_seas_block <- function(
                     onclick = sprintf("insertExample('%s', 'seas(x = x, forecast.maxlead = 24)'); return false;", NS(id, "seas_call")),
                     "24-month forecast"
                   )
+                )
+              ),
+
+              # Generate Static button
+              div(
+                style = "display: inline-block; margin-right: 15px;",
+                actionButton(
+                  NS(id, "generate_static"),
+                  "Generate Static",
+                  icon = icon("code"),
+                  class = "btn btn-outline-secondary"
                 )
               ),
 
