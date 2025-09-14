@@ -361,6 +361,7 @@ new_seas_block <- function(
                 class = "text-muted small",
                 style = "line-height: 32px;",
                 tags$code("Ctrl+Space"), ": autocomplete | ",
+                tags$code("Ctrl+Enter"), ": apply changes | ",
                 "Drag bottom edge to resize editor"
               ),
 
@@ -517,7 +518,7 @@ new_seas_block <- function(
             br(),
             div(
               class = "small text-muted mt-2",
-              "Click to format and apply your seasonal adjustment specification"
+              "Click or press ", tags$code("Ctrl+Enter"), " to format and apply changes"
             )
           )
         )

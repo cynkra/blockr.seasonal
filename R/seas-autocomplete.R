@@ -415,6 +415,19 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
 
         var editor = ace.edit(editorEl);
         if (editor) {
+          // Add keyboard shortcut for submit (Ctrl/Cmd+Enter)
+          editor.commands.addCommand({
+            name: "submitSeasCall",
+            bindKey: {win: "Ctrl-Enter", mac: "Command-Enter"},
+            exec: function(editor) {
+              // Find and click the submit button
+              var submitBtn = document.querySelector("#" + "%s".replace("seas_call", "submit"));
+              if (submitBtn) {
+                submitBtn.click();
+              }
+            }
+          });
+
           // Position cursor inside list() parentheses
           editor.commands.on("afterExec", function(e) {
             if (e.command.name === "insertstring" || e.command.name === "Return") {
@@ -485,9 +498,10 @@ setup_seas_ace_editor <- function(id, value = "", height = "200px") {
     })();
   ',
     jsonlite::toJSON(get_seas_categories(), auto_unbox = TRUE),
-    id,  # Line 178: getElementById for editor
-    id,  # Line 195: container ID for resizing
-    id   # Line 238: getElementById for autocomplete setup
+    id,  # Line 413: getElementById for editor
+    id,  # Line 424: ID for submit button (seas_call -> submit)
+    id,  # Line 443: container ID for resizing
+    id   # Line 473: getElementById for autocomplete setup
   )
 
   tagList(
