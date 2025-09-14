@@ -25,11 +25,11 @@ serve(
     blocks = c(
       data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
       seas = new_seas_block(seas_call = "seas(x = x, x11 = list())"),
-      series = new_series_block(series = "d10")
+      final = new_final_block()
     ),
     links = c(
       new_link("data", "seas"),
-      new_link("seas", "series")
+      new_link("seas", "final")
     )
   )
 )
