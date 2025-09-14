@@ -10,6 +10,15 @@
 #' - Submit button with validation (changes applied only on submit)
 #' - Enhanced syntax highlighting for R code
 #' - Error handling with user-friendly notifications
+#' - Optional xreg and xtrans inputs for external regressors
+#'
+#' The block accepts three inputs:
+#' - x: The main time series (required)
+#' - xreg: External regressors (optional)
+#' - xtrans: Transformation variables (optional)
+#'
+#' When xreg or xtrans are provided, they can be referenced in the seas_call,
+#' for example: "seas(x = x, xreg = xreg, regression.variables = c('td', 'easter'))"
 #'
 #' @param seas_call String containing the complete seas() call (default: "seas(x = x, x11 = list())")
 #' @param ... Additional arguments passed to new_transform_block
@@ -20,8 +29,8 @@ new_seas_block <- function(
   ...
 ) {
   blockr.core::new_transform_block(
-    server = function(id, x) {
-      # Named input x instead of generic data
+    server = function(id, x, xreg = NULL, xtrans = NULL) {
+      # Named inputs: x (required), xreg and xtrans (optional)
       moduleServer(
         id,
         function(input, output, session) {
@@ -45,10 +54,25 @@ new_seas_block <- function(
               call_text <- gsub("seas\\(", "seasonal::seas(", call_text)
             }
 
-            # Create expression that converts x to ts and evaluates seas
+            # Create expression that converts inputs and evaluates seas
+            # Only include xreg/xtrans assignments if they are provided
+            xreg_assignment <- if (!is.null(xreg())) {
+              "xreg <- tsbox::ts_ts(xreg)"
+            } else {
+              ""
+            }
+
+            xtrans_assignment <- if (!is.null(xtrans())) {
+              "xtrans <- tsbox::ts_ts(xtrans)"
+            } else {
+              ""
+            }
+
             expr_text <- glue::glue(
               "local({{
                 x <- tsbox::ts_ts(x)
+                {xreg_assignment}
+                {xtrans_assignment}
                 {call_text}
               }})"
             )
@@ -137,7 +161,9 @@ new_seas_block <- function(
               r_expr_validated()
             }),
             state = list(
-              seas_call = r_seas_call_validated
+              seas_call = r_seas_call_validated,
+              xreg = reactive(xreg()),
+              xtrans = reactive(xtrans())
             )
           )
         }
@@ -525,7 +551,7 @@ new_seas_block <- function(
       )
     },
     class = "seas_block",
-    allow_empty_state = character(0),
+    allow_empty_state = c("xreg", "xtrans"),
     ...
   )
 }

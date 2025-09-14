@@ -24,5 +24,16 @@ Features:
 \item Submit button with validation (changes applied only on submit)
 \item Enhanced syntax highlighting for R code
 \item Error handling with user-friendly notifications
+\item Optional xreg and xtrans inputs for external regressors
 }
+
+The block accepts three inputs:
+\itemize{
+\item x: The main time series (required)
+\item xreg: External regressors (optional)
+\item xtrans: Transformation variables (optional)
+}
+
+When xreg or xtrans are provided, they can be referenced in the seas_call,
+for example: "seas(x = x, xreg = xreg, regression.variables = c('td', 'easter'))"
 }
