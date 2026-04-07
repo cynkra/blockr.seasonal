@@ -1,0 +1,1385 @@
+{
+  "x11": {
+    "spec": "x11",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate X-11 seasonal adjustment (empty = use defaults)"
+  },
+  "seats": {
+    "spec": "seats",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate SEATS seasonal adjustment (empty = use defaults)"
+  },
+  "automdl": {
+    "spec": "automdl",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate automatic ARIMA model selection (empty = use defaults)"
+  },
+  "transform": {
+    "spec": "transform",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate series transformation (empty = use defaults)"
+  },
+  "regression": {
+    "spec": "regression",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate regression modeling (empty = use defaults)"
+  },
+  "outlier": {
+    "spec": "outlier",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate automatic outlier detection (empty = use defaults)"
+  },
+  "arima": {
+    "spec": "arima",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate ARIMA specification (empty = use defaults)"
+  },
+  "estimate": {
+    "spec": "estimate",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate estimation parameters (empty = use defaults)"
+  },
+  "check": {
+    "spec": "check",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate residual diagnostics (empty = use defaults)"
+  },
+  "forecast": {
+    "spec": "forecast",
+    "arg": null,
+    "type": "spec",
+    "values": null,
+    "default": null,
+    "description": "Activate forecasting (empty = use defaults)"
+  },
+  "arima.model": {
+    "spec": "arima",
+    "arg": "model",
+    "type": "enum",
+    "values": [
+      {
+        "value": "(0 1 1)(0 1 1)",
+        "label": "(0 1 1)(0 1 1)",
+        "description": "Airline model"
+      },
+      {
+        "value": "(1 1 0)(0 1 1)",
+        "label": "(1 1 0)(0 1 1)",
+        "description": "AR(1) with seasonal MA"
+      },
+      {
+        "value": "(0 1 2)(0 1 1)",
+        "label": "(0 1 2)(0 1 1)",
+        "description": "MA(2) with seasonal MA"
+      },
+      {
+        "value": "(2 1 0)(0 1 1)",
+        "label": "(2 1 0)(0 1 1)",
+        "description": "AR(2) with seasonal MA"
+      },
+      {
+        "value": "(1 1 1)(0 1 1)",
+        "label": "(1 1 1)(0 1 1)",
+        "description": "ARMA(1,1) with seasonal MA"
+      },
+      {
+        "value": "(1 0 0)(0 1 1)",
+        "label": "(1 0 0)(0 1 1)",
+        "description": "AR(1), no differencing"
+      },
+      {
+        "value": "(0 1 1)(1 0 1)",
+        "label": "(0 1 1)(1 0 1)",
+        "description": "MA(1) with seasonal ARMA"
+      },
+      {
+        "value": "(0 1 1)",
+        "label": "(0 1 1)",
+        "description": "Simple MA(1)"
+      },
+      {
+        "value": "(1 0 1)",
+        "label": "(1 0 1)",
+        "description": "ARMA(1,1), no differencing"
+      },
+      {
+        "value": "(2 1 2)",
+        "label": "(2 1 2)",
+        "description": "ARMA(2,2)"
+      },
+      {
+        "value": "(0 1 1)(0 1 1)4",
+        "label": "(0 1 1)(0 1 1)4",
+        "description": "Airline model, quarterly"
+      },
+      {
+        "value": "(0 1 1)(0 1 1)12",
+        "label": "(0 1 1)(0 1 1)12",
+        "description": "Airline model, monthly"
+      }
+    ],
+    "default": null,
+    "description": "ARIMA model in Box-Jenkins notation (p d q)(P D Q)"
+  },
+  "arima.ar": {
+    "spec": "arima",
+    "arg": "ar",
+    "type": "text",
+    "default": null,
+    "description": "Initial values for autoregressive parameters, suffix f to fix"
+  },
+  "arima.ma": {
+    "spec": "arima",
+    "arg": "ma",
+    "type": "text",
+    "default": null,
+    "description": "Initial values for moving average parameters, suffix f to fix"
+  },
+  "automdl.acceptdefault": {
+    "spec": "automdl",
+    "arg": "acceptdefault",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Accept airline model if adequate"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Always search for better model"
+      }
+    ],
+    "default": "no",
+    "description": "Accept default airline model when Ljung-Box Q is acceptable"
+  },
+  "automdl.armalimit": {
+    "spec": "automdl",
+    "arg": "armalimit",
+    "type": "numeric",
+    "default": 1.0,
+    "description": "Threshold for t-statistics of ARMA coefficients in parsimony test"
+  },
+  "automdl.balanced": {
+    "spec": "automdl",
+    "arg": "balanced",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Prefer balanced model orders"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "No balance constraint"
+      }
+    ],
+    "default": "no",
+    "description": "Prefer balanced models in automatic model selection"
+  },
+  "automdl.checkmu": {
+    "spec": "automdl",
+    "arg": "checkmu",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Test constant term significance"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Skip constant term test"
+      }
+    ],
+    "default": "yes",
+    "description": "Check significance of constant term during model selection"
+  },
+  "automdl.exactdiff": {
+    "spec": "automdl",
+    "arg": "exactdiff",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Use exact likelihood for differencing"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Use conditional likelihood"
+      },
+      {
+        "value": "first",
+        "label": "first",
+        "description": "Exact likelihood on first pass only"
+      }
+    ],
+    "default": "first",
+    "description": "Likelihood estimation method when Hannan-Rissanen fails"
+  },
+  "automdl.fcstlim": {
+    "spec": "automdl",
+    "arg": "fcstlim",
+    "type": "numeric",
+    "default": 15,
+    "description": "Acceptance threshold (percent) for within-sample forecast error test"
+  },
+  "automdl.hrinitial": {
+    "spec": "automdl",
+    "arg": "hrinitial",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Use Hannan-Rissanen initial estimates"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Skip Hannan-Rissanen initialization"
+      }
+    ],
+    "default": "no",
+    "description": "Use Hannan-Rissanen before exact maximum likelihood estimation"
+  },
+  "automdl.ljungboxlimit": {
+    "spec": "automdl",
+    "arg": "ljungboxlimit",
+    "type": "numeric",
+    "default": 0.95,
+    "description": "Confidence coefficient for Ljung-Box Q acceptance criterion"
+  },
+  "automdl.maxdiff": {
+    "spec": "automdl",
+    "arg": "maxdiff",
+    "type": "enum",
+    "values": [
+      {
+        "value": "(1 0)",
+        "label": "(1 0)",
+        "description": "Regular max 1, no seasonal"
+      },
+      {
+        "value": "(1 1)",
+        "label": "(1 1)",
+        "description": "Regular max 1, seasonal max 1"
+      },
+      {
+        "value": "(2 0)",
+        "label": "(2 0)",
+        "description": "Regular max 2, no seasonal"
+      },
+      {
+        "value": "(2 1)",
+        "label": "(2 1)",
+        "description": "Regular max 2, seasonal max 1"
+      }
+    ],
+    "default": "(2 1)",
+    "description": "Maximum orders of regular and seasonal differencing"
+  },
+  "automdl.maxorder": {
+    "spec": "automdl",
+    "arg": "maxorder",
+    "type": "enum",
+    "values": [
+      {
+        "value": "(2 1)",
+        "label": "(2 1)",
+        "description": "Regular max 2, seasonal max 1"
+      },
+      {
+        "value": "(3 1)",
+        "label": "(3 1)",
+        "description": "Regular max 3, seasonal max 1"
+      },
+      {
+        "value": "(4 1)",
+        "label": "(4 1)",
+        "description": "Regular max 4, seasonal max 1"
+      },
+      {
+        "value": "(2 2)",
+        "label": "(2 2)",
+        "description": "Regular max 2, seasonal max 2"
+      },
+      {
+        "value": "(3 2)",
+        "label": "(3 2)",
+        "description": "Regular max 3, seasonal max 2"
+      },
+      {
+        "value": "(4 2)",
+        "label": "(4 2)",
+        "description": "Regular max 4, seasonal max 2"
+      }
+    ],
+    "default": "(2 1)",
+    "description": "Maximum orders of regular and seasonal ARMA polynomials"
+  },
+  "automdl.mixed": {
+    "spec": "automdl",
+    "arg": "mixed",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Allow mixed AR+MA models"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Pure AR or MA only"
+      }
+    ],
+    "default": "yes",
+    "description": "Consider models with both AR and MA terms"
+  },
+  "automdl.reducecv": {
+    "spec": "automdl",
+    "arg": "reducecv",
+    "type": "numeric",
+    "default": 0.14268,
+    "description": "Percentage reduction in outlier critical value on Ljung-Box failure"
+  },
+  "automdl.rejectfcst": {
+    "spec": "automdl",
+    "arg": "rejectfcst",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Enable forecast error rejection test"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Disable forecast error rejection test"
+      }
+    ],
+    "default": "no",
+    "description": "Use out-of-sample forecast error test for model rejection"
+  },
+  "automdl.urfinal": {
+    "spec": "automdl",
+    "arg": "urfinal",
+    "type": "numeric",
+    "default": 1.05,
+    "description": "Threshold for final unit root test in AR root detection"
+  },
+  "check.maxlag": {
+    "spec": "check",
+    "arg": "maxlag",
+    "type": "numeric",
+    "default": 24,
+    "description": "Number of lags for residual ACF and diagnostic tests"
+  },
+  "check.qtype": {
+    "spec": "check",
+    "arg": "qtype",
+    "type": "enum",
+    "values": [
+      {
+        "value": "ljungbox",
+        "label": "ljungbox",
+        "description": "Ljung-Box Q statistic"
+      },
+      {
+        "value": "boxpierce",
+        "label": "boxpierce",
+        "description": "Box-Pierce Q statistic"
+      }
+    ],
+    "default": "ljungbox",
+    "description": "Type of residual diagnostic statistic for autocorrelation plots"
+  },
+  "estimate.exact": {
+    "spec": "estimate",
+    "arg": "exact",
+    "type": "enum",
+    "values": [
+      {
+        "value": "arma",
+        "label": "arma",
+        "description": "Exact ARMA likelihood"
+      },
+      {
+        "value": "ma",
+        "label": "ma",
+        "description": "Exact MA likelihood only"
+      },
+      {
+        "value": "none",
+        "label": "none",
+        "description": "Conditional likelihood"
+      }
+    ],
+    "default": "arma",
+    "description": "Likelihood type for estimation, evaluation, and forecasting"
+  },
+  "estimate.fix": {
+    "spec": "estimate",
+    "arg": "fix",
+    "type": "enum",
+    "values": [
+      {
+        "value": "all",
+        "label": "all",
+        "description": "Fix all coefficients"
+      },
+      {
+        "value": "arma",
+        "label": "arma",
+        "description": "Fix ARMA coefficients"
+      },
+      {
+        "value": "none",
+        "label": "none",
+        "description": "Fix nothing"
+      },
+      {
+        "value": "nochange",
+        "label": "nochange",
+        "description": "Keep current fixed/free status"
+      }
+    ],
+    "default": "nochange",
+    "description": "Hold coefficients fixed during estimation"
+  },
+  "estimate.maxiter": {
+    "spec": "estimate",
+    "arg": "maxiter",
+    "type": "numeric",
+    "default": 1500,
+    "description": "Maximum number of nonlinear estimation iterations"
+  },
+  "estimate.outofsample": {
+    "spec": "estimate",
+    "arg": "outofsample",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Enable out-of-sample forecast errors"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Disable out-of-sample forecast errors"
+      }
+    ],
+    "default": "no",
+    "description": "Use out-of-sample forecasts for average forecast error calculation"
+  },
+  "estimate.tol": {
+    "spec": "estimate",
+    "arg": "tol",
+    "type": "numeric",
+    "default": 1e-05,
+    "description": "Convergence tolerance for nonlinear estimation"
+  },
+  "forecast.exclude": {
+    "spec": "forecast",
+    "arg": "exclude",
+    "type": "numeric",
+    "default": 0,
+    "description": "Number of observations excluded from end before forecasting"
+  },
+  "forecast.lognormal": {
+    "spec": "forecast",
+    "arg": "lognormal",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Apply log-normal bias correction"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "No log-normal bias correction"
+      }
+    ],
+    "default": "no",
+    "description": "Apply log-normal distribution adjustment to forecasts"
+  },
+  "forecast.maxback": {
+    "spec": "forecast",
+    "arg": "maxback",
+    "type": "numeric",
+    "default": 0,
+    "description": "Number of backcasts to produce"
+  },
+  "forecast.maxlead": {
+    "spec": "forecast",
+    "arg": "maxlead",
+    "type": "numeric",
+    "default": 12,
+    "description": "Number of forecasts to produce"
+  },
+  "forecast.probability": {
+    "spec": "forecast",
+    "arg": "probability",
+    "type": "numeric",
+    "default": 0.95,
+    "description": "Coverage probability for forecast prediction intervals"
+  },
+  "outlier.almost": {
+    "spec": "outlier",
+    "arg": "almost",
+    "type": "numeric",
+    "default": 0.5,
+    "description": "Differential for detecting near-outliers close to critical value"
+  },
+  "outlier.critical": {
+    "spec": "outlier",
+    "arg": "critical",
+    "type": "numeric",
+    "default": null,
+    "description": "Absolute t-statistic threshold for outlier detection"
+  },
+  "outlier.lsrun": {
+    "spec": "outlier",
+    "arg": "lsrun",
+    "type": "numeric",
+    "default": 0,
+    "description": "Compute t-statistics for runs of level shifts up to this length"
+  },
+  "outlier.method": {
+    "spec": "outlier",
+    "arg": "method",
+    "type": "enum",
+    "values": [
+      {
+        "value": "addone",
+        "label": "addone",
+        "description": "Add outliers one at a time"
+      },
+      {
+        "value": "addall",
+        "label": "addall",
+        "description": "Add all significant outliers at once"
+      }
+    ],
+    "default": "addone",
+    "description": "Method for successively adding detected outliers to model"
+  },
+  "outlier.tcrate": {
+    "spec": "outlier",
+    "arg": "tcrate",
+    "type": "numeric",
+    "default": 0.7,
+    "description": "Rate of decay for temporary change outlier regressor"
+  },
+  "outlier.types": {
+    "spec": "outlier",
+    "arg": "types",
+    "type": "multi-enum",
+    "values": [
+      {
+        "value": "ao",
+        "label": "ao",
+        "description": "Additive outlier (point)"
+      },
+      {
+        "value": "ls",
+        "label": "ls",
+        "description": "Level shift"
+      },
+      {
+        "value": "tc",
+        "label": "tc",
+        "description": "Temporary change"
+      },
+      {
+        "value": "so",
+        "label": "so",
+        "description": "Seasonal outlier"
+      },
+      {
+        "value": "rp",
+        "label": "rp",
+        "description": "Ramp effect"
+      },
+      {
+        "value": "tl",
+        "label": "tl",
+        "description": "Temporary level shift"
+      },
+      {
+        "value": "all",
+        "label": "all",
+        "description": "All outlier types"
+      }
+    ],
+    "default": null,
+    "description": "Types of outliers to detect automatically"
+  },
+  "regression.aictest": {
+    "spec": "regression",
+    "arg": "aictest",
+    "type": "multi-enum",
+    "values": [
+      {
+        "value": "td",
+        "label": "td",
+        "description": "Test trading day via AIC"
+      },
+      {
+        "value": "easter",
+        "label": "easter",
+        "description": "Test Easter via AIC"
+      }
+    ],
+    "default": null,
+    "description": "Regression variables to test for inclusion via AIC comparison"
+  },
+  "regression.chi2test": {
+    "spec": "regression",
+    "arg": "chi2test",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Enable Chi-squared holiday test"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Disable Chi-squared holiday test"
+      }
+    ],
+    "default": "no",
+    "description": "Use Chi-squared test for holiday regressor selection"
+  },
+  "regression.chi2testcv": {
+    "spec": "regression",
+    "arg": "chi2testcv",
+    "type": "numeric",
+    "default": 0.01,
+    "description": "Probability for critical value in Chi-squared selection"
+  },
+  "regression.tlimit": {
+    "spec": "regression",
+    "arg": "tlimit",
+    "type": "numeric",
+    "default": 2.0,
+    "description": "Threshold for t-statistic in regressor significance testing"
+  },
+  "regression.variables": {
+    "spec": "regression",
+    "arg": "variables",
+    "type": "multi-enum",
+    "values": [
+      {
+        "value": "td",
+        "label": "td",
+        "description": "Trading day effect (6 variables)"
+      },
+      {
+        "value": "tdnolpyear",
+        "label": "tdnolpyear",
+        "description": "Trading day without leap year"
+      },
+      {
+        "value": "td1coef",
+        "label": "td1coef",
+        "description": "Weekday-weekend contrast with leap year"
+      },
+      {
+        "value": "td1nolpyear",
+        "label": "td1nolpyear",
+        "description": "Weekday-weekend contrast only"
+      },
+      {
+        "value": "lpyear",
+        "label": "lpyear",
+        "description": "Leap year effect"
+      },
+      {
+        "value": "lom",
+        "label": "lom",
+        "description": "Length of month"
+      },
+      {
+        "value": "loq",
+        "label": "loq",
+        "description": "Length of quarter"
+      },
+      {
+        "value": "const",
+        "label": "const",
+        "description": "Constant (mean) term"
+      },
+      {
+        "value": "seasonal",
+        "label": "seasonal",
+        "description": "Fixed seasonal contrasts"
+      },
+      {
+        "value": "easter[1]",
+        "label": "easter[1]",
+        "description": "Easter effect, 1-day window"
+      },
+      {
+        "value": "easter[8]",
+        "label": "easter[8]",
+        "description": "Easter effect, 8-day window"
+      },
+      {
+        "value": "easter[15]",
+        "label": "easter[15]",
+        "description": "Easter effect, 15-day window"
+      },
+      {
+        "value": "sceaster[1]",
+        "label": "sceaster[1]",
+        "description": "Statistics Canada Easter, 1-day"
+      },
+      {
+        "value": "sceaster[8]",
+        "label": "sceaster[8]",
+        "description": "Statistics Canada Easter, 8-day"
+      },
+      {
+        "value": "labor[1]",
+        "label": "labor[1]",
+        "description": "Labor Day effect, 1-day"
+      },
+      {
+        "value": "labor[8]",
+        "label": "labor[8]",
+        "description": "Labor Day effect, 8-day"
+      },
+      {
+        "value": "labor[15]",
+        "label": "labor[15]",
+        "description": "Labor Day effect, 15-day"
+      },
+      {
+        "value": "thank[1]",
+        "label": "thank[1]",
+        "description": "Thanksgiving effect, 1-day"
+      },
+      {
+        "value": "thank[8]",
+        "label": "thank[8]",
+        "description": "Thanksgiving effect, 8-day"
+      },
+      {
+        "value": "easterstock[1]",
+        "label": "easterstock[1]",
+        "description": "Easter stock effect, 1-day"
+      },
+      {
+        "value": "easterstock[8]",
+        "label": "easterstock[8]",
+        "description": "Easter stock effect, 8-day"
+      },
+      {
+        "value": "tdstock[31]",
+        "label": "tdstock[31]",
+        "description": "End-of-month stock trading day"
+      },
+      {
+        "value": "tdstock1coef[31]",
+        "label": "tdstock1coef[31]",
+        "description": "End-of-month stock (constrained)"
+      },
+      {
+        "value": "outlier",
+        "label": "outlier",
+        "description": "Automatic outlier detection in regression"
+      }
+    ],
+    "default": null,
+    "description": "Predefined regression variables for the regARIMA model"
+  },
+  "seats.appendfcst": {
+    "spec": "seats",
+    "arg": "appendfcst",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Include forecasts in SEATS output"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Exclude forecasts from SEATS output"
+      }
+    ],
+    "default": "no",
+    "description": "Include forecasts in SEATS output tables"
+  },
+  "seats.finite": {
+    "spec": "seats",
+    "arg": "finite",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Enable finite-sample diagnostics"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Use asymptotic diagnostics"
+      }
+    ],
+    "default": "no",
+    "description": "Use finite-sample seasonal decomposition diagnostics"
+  },
+  "seats.hpcycle": {
+    "spec": "seats",
+    "arg": "hpcycle",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Decompose trend via HP filter"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "No HP trend-cycle decomposition"
+      }
+    ],
+    "default": "no",
+    "description": "Decompose trend-cycle into trend and cycle via Hodrick-Prescott filter"
+  },
+  "seats.noadmiss": {
+    "spec": "seats",
+    "arg": "noadmiss",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Replace with admissible alternative"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Keep non-admissible model as-is"
+      }
+    ],
+    "default": "no",
+    "description": "Replace non-admissible model with closest admissible alternative"
+  },
+  "seats.out": {
+    "spec": "seats",
+    "arg": "out",
+    "type": "enum",
+    "values": [
+      {
+        "value": "0",
+        "label": "0",
+        "description": "Minimal output"
+      },
+      {
+        "value": "1",
+        "label": "1",
+        "description": "Standard output"
+      },
+      {
+        "value": "2",
+        "label": "2",
+        "description": "Verbose output"
+      }
+    ],
+    "default": "1",
+    "description": "Verbosity level of decomposition diagnostic output"
+  },
+  "seats.qmax": {
+    "spec": "seats",
+    "arg": "qmax",
+    "type": "numeric",
+    "default": 50,
+    "description": "Ljung-Box Q limit for determining model quality"
+  },
+  "seats.rmod": {
+    "spec": "seats",
+    "arg": "rmod",
+    "type": "numeric",
+    "default": 0.85,
+    "description": "Controls AR roots in SEATS decomposition"
+  },
+  "seats.statseas": {
+    "spec": "seats",
+    "arg": "statseas",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Accept stationary seasonal models"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Require non-stationary seasonal"
+      }
+    ],
+    "default": "yes",
+    "description": "Accept stationary seasonal models in SEATS"
+  },
+  "transform.adjust": {
+    "spec": "transform",
+    "arg": "adjust",
+    "type": "enum",
+    "values": [
+      {
+        "value": "lom",
+        "label": "lom",
+        "description": "Length-of-month adjustment"
+      },
+      {
+        "value": "loq",
+        "label": "loq",
+        "description": "Length-of-quarter adjustment"
+      },
+      {
+        "value": "lpyear",
+        "label": "lpyear",
+        "description": "Leap year adjustment"
+      }
+    ],
+    "default": null,
+    "description": "Length-of-month, length-of-quarter, or leap year adjustment"
+  },
+  "transform.aicdiff": {
+    "spec": "transform",
+    "arg": "aicdiff",
+    "type": "numeric",
+    "default": -2.0,
+    "description": "AICC difference threshold for automatic transformation selection"
+  },
+  "transform.constant": {
+    "spec": "transform",
+    "arg": "constant",
+    "type": "numeric",
+    "default": null,
+    "description": "Positive constant added to series before transformation"
+  },
+  "transform.function": {
+    "spec": "transform",
+    "arg": "function",
+    "type": "enum",
+    "values": [
+      {
+        "value": "none",
+        "label": "none",
+        "description": "No transformation"
+      },
+      {
+        "value": "log",
+        "label": "log",
+        "description": "Log transformation"
+      },
+      {
+        "value": "sqrt",
+        "label": "sqrt",
+        "description": "Square root transformation"
+      },
+      {
+        "value": "inverse",
+        "label": "inverse",
+        "description": "Inverse transformation"
+      },
+      {
+        "value": "logistic",
+        "label": "logistic",
+        "description": "Logistic transformation"
+      },
+      {
+        "value": "auto",
+        "label": "auto",
+        "description": "Automatic selection (log vs none)"
+      }
+    ],
+    "default": "none",
+    "description": "Data transformation applied prior to regARIMA estimation"
+  },
+  "transform.mode": {
+    "spec": "transform",
+    "arg": "mode",
+    "type": "enum",
+    "values": [
+      {
+        "value": "ratio",
+        "label": "ratio",
+        "description": "Divide by factors"
+      },
+      {
+        "value": "percent",
+        "label": "percent",
+        "description": "Percentage adjustment"
+      },
+      {
+        "value": "diff",
+        "label": "diff",
+        "description": "Subtract factors"
+      }
+    ],
+    "default": "percent",
+    "description": "Application method for user-defined prior-adjustment factors"
+  },
+  "transform.power": {
+    "spec": "transform",
+    "arg": "power",
+    "type": "numeric",
+    "default": 1,
+    "description": "Box-Cox power transformation parameter"
+  },
+  "transform.type": {
+    "spec": "transform",
+    "arg": "type",
+    "type": "enum",
+    "values": [
+      {
+        "value": "permanent",
+        "label": "permanent",
+        "description": "Permanent prior factors"
+      },
+      {
+        "value": "temporary",
+        "label": "temporary",
+        "description": "Temporary prior factors"
+      }
+    ],
+    "default": "permanent",
+    "description": "Type of prior-adjustment factors (permanent vs temporary)"
+  },
+  "x11.appendbcst": {
+    "spec": "x11",
+    "arg": "appendbcst",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Include backcasts in X-11 output"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Exclude backcasts from X-11 output"
+      }
+    ],
+    "default": "no",
+    "description": "Include backcasts in X-11 output tables"
+  },
+  "x11.appendfcst": {
+    "spec": "x11",
+    "arg": "appendfcst",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Include forecasts in X-11 output"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Exclude forecasts from X-11 output"
+      }
+    ],
+    "default": "yes",
+    "description": "Include forecasts in X-11 output tables"
+  },
+  "x11.calendarsigma": {
+    "spec": "x11",
+    "arg": "calendarsigma",
+    "type": "enum",
+    "values": [
+      {
+        "value": "all",
+        "label": "all",
+        "description": "All months use separate sigma"
+      },
+      {
+        "value": "signif",
+        "label": "signif",
+        "description": "Only significant months"
+      },
+      {
+        "value": "select",
+        "label": "select",
+        "description": "User-selected months"
+      }
+    ],
+    "default": null,
+    "description": "Compute standard errors for extreme value detection by calendar month"
+  },
+  "x11.centerseasonal": {
+    "spec": "x11",
+    "arg": "centerseasonal",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Center seasonal factors"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Do not center seasonal factors"
+      }
+    ],
+    "default": "no",
+    "description": "Center seasonal factors to combine with user-defined seasonal effects"
+  },
+  "x11.excludefcst": {
+    "spec": "x11",
+    "arg": "excludefcst",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Exclude forecasts from seasonal filter"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Include forecasts in seasonal filter"
+      }
+    ],
+    "default": "no",
+    "description": "Exclude forecasts from seasonal filter computation"
+  },
+  "x11.final": {
+    "spec": "x11",
+    "arg": "final",
+    "type": "multi-enum",
+    "values": [
+      {
+        "value": "ao",
+        "label": "ao",
+        "description": "Remove additive outlier effects"
+      },
+      {
+        "value": "ls",
+        "label": "ls",
+        "description": "Remove level shift effects"
+      },
+      {
+        "value": "tc",
+        "label": "tc",
+        "description": "Remove temporary change effects"
+      },
+      {
+        "value": "user",
+        "label": "user",
+        "description": "Remove user-defined effects"
+      },
+      {
+        "value": "none",
+        "label": "none",
+        "description": "Keep all effects"
+      }
+    ],
+    "default": null,
+    "description": "Prior adjustment factor types to remove from final adjusted series"
+  },
+  "x11.keepholiday": {
+    "spec": "x11",
+    "arg": "keepholiday",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Retain holiday effects in output"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Remove holiday effects from output"
+      }
+    ],
+    "default": "no",
+    "description": "Keep holiday effects in final seasonally adjusted series"
+  },
+  "x11.mode": {
+    "spec": "x11",
+    "arg": "mode",
+    "type": "enum",
+    "values": [
+      {
+        "value": "mult",
+        "label": "mult",
+        "description": "Multiplicative decomposition"
+      },
+      {
+        "value": "add",
+        "label": "add",
+        "description": "Additive decomposition"
+      },
+      {
+        "value": "pseudoadd",
+        "label": "pseudoadd",
+        "description": "Pseudo-additive decomposition"
+      },
+      {
+        "value": "logadd",
+        "label": "logadd",
+        "description": "Log-additive decomposition"
+      }
+    ],
+    "default": "mult",
+    "description": "Decomposition model for seasonal adjustment"
+  },
+  "x11.seasonalma": {
+    "spec": "x11",
+    "arg": "seasonalma",
+    "type": "enum",
+    "values": [
+      {
+        "value": "s3x1",
+        "label": "s3x1",
+        "description": "3×1 seasonal filter"
+      },
+      {
+        "value": "s3x3",
+        "label": "s3x3",
+        "description": "3×3 seasonal filter"
+      },
+      {
+        "value": "s3x5",
+        "label": "s3x5",
+        "description": "3×5 seasonal filter"
+      },
+      {
+        "value": "s3x9",
+        "label": "s3x9",
+        "description": "3×9 seasonal filter"
+      },
+      {
+        "value": "s3x15",
+        "label": "s3x15",
+        "description": "3×15 seasonal filter"
+      },
+      {
+        "value": "stable",
+        "label": "stable",
+        "description": "Stable seasonal filter"
+      },
+      {
+        "value": "msr",
+        "label": "msr",
+        "description": "Automatic (MSR-based)"
+      },
+      {
+        "value": "x11default",
+        "label": "x11default",
+        "description": "X-11 default selection"
+      }
+    ],
+    "default": "msr",
+    "description": "Seasonal moving average filter for factor estimation"
+  },
+  "x11.sfshort": {
+    "spec": "x11",
+    "arg": "sfshort",
+    "type": "enum",
+    "values": [
+      {
+        "value": "yes",
+        "label": "yes",
+        "description": "Use shorter filters for short series"
+      },
+      {
+        "value": "no",
+        "label": "no",
+        "description": "Use standard-length filters"
+      }
+    ],
+    "default": "no",
+    "description": "Use shorter seasonal filters for series of 5 years or less"
+  },
+  "x11.sigmalim": {
+    "spec": "x11",
+    "arg": "sigmalim",
+    "type": "text",
+    "default": "(1.5 2.5)",
+    "description": "Lower and upper sigma limits for downweighting extreme irregulars"
+  },
+  "x11.trendma": {
+    "spec": "x11",
+    "arg": "trendma",
+    "type": "numeric",
+    "default": null,
+    "description": "Henderson moving average length for trend-cycle estimation (odd integer)"
+  },
+  "x11.type": {
+    "spec": "x11",
+    "arg": "type",
+    "type": "enum",
+    "values": [
+      {
+        "value": "sa",
+        "label": "sa",
+        "description": "Full seasonal adjustment"
+      },
+      {
+        "value": "trend",
+        "label": "trend",
+        "description": "Trend estimation only"
+      },
+      {
+        "value": "summary",
+        "label": "summary",
+        "description": "Summary statistics only"
+      }
+    ],
+    "default": "sa",
+    "description": "Type of seasonal adjustment processing"
+  }
+}

@@ -2,38 +2,40 @@
 % Please edit documentation in R/seas-block.R
 \name{new_seas_block}
 \alias{new_seas_block}
-\title{Seasonal Adjustment Block}
+\title{Seasonal Adjustment Block (JS-driven argument builder)}
 \usage{
-new_seas_block(seas_call = "seas(x = x, x11 = list())", ...)
+new_seas_block(state = list(args = list()), ...)
 }
 \arguments{
-\item{seas_call}{String containing the complete seas() call (default: "seas(x = x, x11 = list())")}
+\item{state}{List with \code{args} (array of objects with \code{name} and \code{value}).
+Each argument becomes a parameter in the \code{seasonal::seas()} call.}
 
-\item{...}{Additional arguments passed to new_transform_block}
+\item{...}{Additional arguments forwarded to \code{\link[blockr.core:new_transform_block]{blockr.core::new_transform_block()}}}
 }
 \description{
 Performs seasonal adjustment using X-13ARIMA-SEATS via the seasonal package.
-This block introduces a novel pattern in blockr: returning a statistical model
-object rather than data, enabling downstream blocks to consume the model.
+Each argument is entered as a separate row with autocomplete and adaptive
+value inputs driven by the X-13 argument catalog.
 }
 \details{
-Features:
-\itemize{
-\item Height-adjustable ACE editor with resizing handle
-\item Comprehensive autocomplete for seas() parameters and values
-\item Submit button with validation (changes applied only on submit)
-\item Enhanced syntax highlighting for R code
-\item Error handling with user-friendly notifications
-\item Optional xreg and xtrans inputs for external regressors
-}
-
 The block accepts three inputs:
 \itemize{
 \item x: The main time series (required)
 \item xreg: External regressors (optional)
 \item xtrans: Transformation variables (optional)
 }
+}
+\examples{
+if (interactive()) {
+  library(blockr.core)
+  serve(
+    new_seas_block(
+      state = list(args = list(
+        list(name = "x11.mode", value = "mult")
+      ))
+    ),
+    data = list(x = tsbox::ts_tbl(datasets::AirPassengers))
+  )
+}
 
-When xreg or xtrans are provided, they can be referenced in the seas_call,
-for example: "seas(x = x, xreg = xreg, regression.variables = c('td', 'easter'))"
 }

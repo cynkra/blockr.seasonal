@@ -1,0 +1,86 @@
+/* =========================================================================
+   SeasBlock — seas() argument builder layout
+   ========================================================================= */
+
+.seas-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.seas-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Name input wrapper (wider than mutate for longer arg names) --- */
+.seas-name-wrap {
+  width: 220px;
+  flex-shrink: 0;
+}
+
+/* --- Equals separator --- */
+.seas-eq-sep {
+  color: var(--blockr-grey-400, #9ca3af);
+  font-size: 13px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* --- Value wrapper --- */
+.seas-value-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+/* --- Text value input (fallback) --- */
+.seas-text-input {
+  width: 100%;
+  height: 30px;
+  padding: 4px 10px;
+  font-size: var(--blockr-font-size-base, 0.875rem);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  background: transparent;
+  border: none;
+  color: var(--blockr-color-text-primary, #111827);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.seas-text-input::placeholder {
+  color: var(--blockr-grey-400, #9ca3af);
+}
+
+/* --- Connection indicators (xreg / xtrans) --- */
+.seas-indicators {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.seas-indicators:empty {
+  display: none;
+}
+
+.seas-indicator-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  margin-bottom: 4px;
+  background: rgba(37, 99, 235, 0.04);
+  border: 1px dashed rgba(37, 99, 235, 0.2);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+}
+
+.seas-indicator-label {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 0.8125rem;
+  color: var(--blockr-color-primary, #2563eb);
+  font-weight: 500;
+}
+
+.seas-indicator-status {
+  color: var(--blockr-grey-400, #9ca3af);
+  font-size: 0.75rem;
+}

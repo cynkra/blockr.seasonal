@@ -1,0 +1,170 @@
+/* =========================================================================
+   Blockr.SelectRich — searchable select with two-line items
+   Reusable — extract to blockr.core when needed
+   ========================================================================= */
+
+.blockr-srich {
+  position: relative;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: var(--blockr-font-size-base, 0.875rem);
+  outline: none;
+}
+
+/* --- Control area --- */
+.blockr-srich__control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 2px 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.blockr-srich__value {
+  flex: 1;
+  min-width: 0;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 0.8125rem;
+  color: var(--blockr-color-text-primary, #111827);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blockr-srich__value--placeholder {
+  color: var(--blockr-grey-400, #9ca3af);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.blockr-srich__search {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--blockr-color-text-primary, #111827);
+  padding: 0 8px;
+  opacity: 0;
+  box-sizing: border-box;
+}
+
+.blockr-srich--open .blockr-srich__search {
+  width: 100%;
+  opacity: 1;
+}
+
+.blockr-srich__search::placeholder {
+  color: var(--blockr-grey-400, #9ca3af);
+}
+
+.blockr-srich__arrow {
+  display: flex;
+  align-items: center;
+  color: var(--blockr-grey-400, #9ca3af);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.blockr-srich--open .blockr-srich__arrow {
+  transform: rotate(180deg);
+}
+
+/* --- Dropdown --- */
+.blockr-srich__dropdown {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  min-width: 350px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--blockr-color-border, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+}
+
+.blockr-srich--open .blockr-srich__dropdown {
+  display: block;
+}
+
+.blockr-srich--above .blockr-srich__dropdown {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+/* --- Options (two-line) --- */
+.blockr-srich__option {
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.blockr-srich__option--highlighted {
+  background: var(--blockr-grey-50, #f9fafb);
+}
+
+.blockr-srich__option:hover {
+  background: var(--blockr-grey-50, #f9fafb);
+}
+
+.blockr-srich__option--selected {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.blockr-srich__option--selected.blockr-srich__option--highlighted {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+/* Line 1: label + meta tag */
+.blockr-srich__option-line1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.blockr-srich__option-label {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 0.8125rem;
+  color: var(--blockr-color-text-primary, #111827);
+}
+
+.blockr-srich__option-meta {
+  margin-left: auto;
+  font-size: 0.6875rem;
+  color: #fff;
+  background: var(--blockr-grey-300, #d1d5db);
+  border-radius: 4px;
+  padding: 1px 5px;
+  text-transform: lowercase;
+  flex-shrink: 0;
+}
+
+/* Line 2: description */
+.blockr-srich__option-desc {
+  font-size: 0.75rem;
+  color: var(--blockr-grey-500, #6b7280);
+  line-height: 1.3;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Empty state */
+.blockr-srich__empty {
+  padding: 12px 10px;
+  color: var(--blockr-grey-400, #9ca3af);
+  font-size: 0.8125rem;
+  text-align: center;
+}

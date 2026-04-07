@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary-block.R
 \name{html_coefs}
 \alias{html_coefs}
-\title{Generate HTML coefficients display (seasonalview-style)}
+\title{Generate HTML coefficients display}
 \usage{
 html_coefs(x)
 }
@@ -13,5 +13,5 @@ html_coefs(x)
 HTML content for coefficients
 }
 \description{
-Generate HTML coefficients display (seasonalview-style)
+Generate HTML coefficients display
 }

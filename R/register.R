@@ -10,6 +10,7 @@ register_seasonal_blocks <- function() {
       "new_final_block",
       "new_monthplot_block",
       "new_series_block",
+      "new_series_explorer_block",
       "new_fivebestmdl_block",
       "new_udg_block",
       "new_summary_block"
@@ -19,6 +20,7 @@ register_seasonal_blocks <- function() {
       "Final Plot",
       "Monthplot",
       "Series Extraction",
+      "Series Explorer",
       "Five Best Models",
       "UDG Statistics",
       "Enhanced Summary"
@@ -28,6 +30,7 @@ register_seasonal_blocks <- function() {
       "Plot original vs seasonally adjusted series",
       "Display seasonal patterns by month",
       "Extract time series components from seas model",
+      "Browse and extract X-13 series with searchable card picker and echarts chart",
       "Show five best ARIMA models from automatic selection",
       "Extract detailed X-13 statistics using udg() function",
       "Enhanced model diagnostics and statistical tests"
@@ -36,6 +39,7 @@ register_seasonal_blocks <- function() {
       "transform",
       "plot",
       "plot",
+      "transform",
       "transform",
       "transform",
       "transform",

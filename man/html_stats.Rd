@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary-block.R
 \name{html_stats}
 \alias{html_stats}
-\title{Generate HTML statistics display (seasonalview-style)}
+\title{Generate HTML statistics display}
 \usage{
 html_stats(x, digits = 5)
 }
@@ -15,5 +15,5 @@ html_stats(x, digits = 5)
 HTML content for statistics
 }
 \description{
-Generate HTML statistics display (seasonalview-style)
+Generate HTML statistics display
 }

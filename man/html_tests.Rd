@@ -2,7 +2,7 @@
 % Please edit documentation in R/summary-block.R
 \name{html_tests}
 \alias{html_tests}
-\title{Generate HTML tests display (seasonalview-style)}
+\title{Generate HTML tests display}
 \usage{
 html_tests(x, digits = 4)
 }
@@ -15,5 +15,5 @@ html_tests(x, digits = 4)
 HTML content for tests
 }
 \description{
-Generate HTML tests display (seasonalview-style)
+Generate HTML tests display
 }

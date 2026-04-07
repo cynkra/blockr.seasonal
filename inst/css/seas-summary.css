@@ -1,0 +1,160 @@
+/* =========================================================================
+   Seas Summary Block — model diagnostics display
+   Aligned with blockr.dock design tokens
+   ========================================================================= */
+
+/* --- Container: flat, no extra card chrome --- */
+.seas-summary {
+  padding: 4px 0 0 0;
+}
+
+/* --- Model identity subtitle --- */
+.seas-summary-model {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--blockr-grey-200, #e5e7eb);
+}
+
+.seas-summary-model-spec {
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  font-weight: var(--blockr-font-weight-medium, 500);
+  color: var(--blockr-color-text-secondary, #374151);
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+}
+
+.seas-summary-model-tag {
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  font-weight: var(--blockr-font-weight-medium, 500);
+  color: var(--blockr-blue-600, #2563eb);
+  background: var(--blockr-blue-50, #eff6ff);
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+/* --- X-13 Output ghost button --- */
+.seas-x13-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  font-weight: var(--blockr-font-weight-medium, 500);
+  color: var(--blockr-color-text-muted, #6b7280);
+  background: transparent;
+  border: 1px solid var(--blockr-grey-200, #e5e7eb);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+              border-color 0.15s ease;
+  text-decoration: none;
+}
+
+.seas-x13-btn:hover,
+.seas-x13-btn:focus {
+  background: var(--blockr-color-bg-hover, #f3f4f6);
+  color: var(--blockr-color-text-secondary, #374151);
+  border-color: var(--blockr-grey-300, #d1d5db);
+  text-decoration: none;
+}
+
+/* --- Column header --- */
+.seas-col-header {
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  font-weight: var(--blockr-font-weight-medium, 500);
+  color: var(--blockr-color-text-secondary, #374151);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--blockr-grey-200, #e5e7eb);
+}
+
+/* --- Uniform key-value rows --- */
+.seas-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.seas-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--blockr-grey-100, #f3f4f6);
+  gap: 12px;
+}
+
+.seas-row:last-child {
+  border-bottom: none;
+}
+
+.seas-key {
+  font-size: var(--blockr-font-size-base, 0.875rem);
+  font-weight: var(--blockr-font-weight-medium, 500);
+  color: var(--blockr-color-text-secondary, #374151);
+  white-space: nowrap;
+}
+
+.seas-value {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: var(--blockr-font-size-base, 0.875rem);
+  color: var(--blockr-color-text-primary, #111827);
+  text-align: right;
+}
+
+/* --- Significance badges --- */
+.seas-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  font-size: 0.6875rem;
+  font-weight: var(--blockr-font-weight-semibold, 600);
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 10px;
+  letter-spacing: 0.3px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.seas-badge-sig {
+  background-color: var(--blockr-blue-600, #2563eb);
+}
+
+.seas-badge-marginal {
+  background-color: var(--blockr-grey-400, #9ca3af);
+}
+
+.seas-badge-warn {
+  background-color: var(--blockr-color-error, #dc2626);
+}
+
+.seas-badge-warn-marginal {
+  background-color: #f59e0b;
+  color: #fff;
+}
+
+/* --- Empty state --- */
+.seas-empty {
+  text-align: center;
+  color: var(--blockr-color-text-muted, #6b7280);
+  padding: 16px;
+  font-size: var(--blockr-font-size-base, 0.875rem);
+}
+
+/* --- Column gap --- */
+.seas-summary .col-md-4 {
+  padding: 0 12px;
+}
+
+.seas-summary .col-md-4:first-child {
+  padding-left: 0;
+}
+
+.seas-summary .col-md-4:last-child {
+  padding-right: 0;
+}
