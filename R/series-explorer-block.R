@@ -1,12 +1,9 @@
 #' Series Explorer Block
 #'
-#' A searchable dropdown series picker with an echarts4r chart preview.
-#' Extracts the chosen component from a \code{seas} model and returns it
-#' as a \code{tsbox}-compatible data frame for downstream blocks.
-#'
-#' The dropdown automatically filters to show only series compatible with
-#' the current model method (SEATS or X-11).  An \emph{Advanced} toggle
-#' reveals diagnostic series that are hidden by default.
+#' A searchable dropdown series picker using \code{Blockr.SelectRich} with an
+#' echarts4r chart preview.  Extracts the chosen component from a \code{seas}
+#' model and returns it as a \code{tsbox}-compatible data frame for downstream
+#' blocks.
 #'
 #' @param series Initial series code to display (default: \code{"final"})
 #' @param advanced Whether to show advanced series by default
@@ -20,11 +17,12 @@ new_series_explorer_block <- function(series = "final",
                                       ...) {
 
   blockr.core::new_transform_block(
-    server = function(id, data) {
+    server = function(id, ...args) {
       shiny::moduleServer(
         id,
         function(input, output, session) {
           all_panels_static <- series_explorer_panels()
+          ns <- session$ns
 
           r_series <- shiny::reactiveVal(series)
           r_advanced <- shiny::reactiveVal(advanced)
@@ -35,6 +33,13 @@ new_series_explorer_block <- function(series = "final",
             sx_model_method(model)
           })
 
+          # Helper: get data from first variadic input
+          data <- shiny::reactive({
+            d <- ...args[["1"]]
+            shiny::req(d)
+            d
+          })
+
           r_panels <- shiny::reactive({
             method <- r_method()
             Filter(function(p) {
@@ -42,8 +47,8 @@ new_series_explorer_block <- function(series = "final",
             }, all_panels_static)
           })
 
-          # Build grouped choices for selectize
-          r_choices <- shiny::reactive({
+          # Build items for SelectRich
+          r_items <- shiny::reactive({
             panels <- r_panels()
             show_advanced <- r_advanced()
             basic_specs <- sx_basic_specs()
@@ -52,36 +57,35 @@ new_series_explorer_block <- function(series = "final",
               panels <- Filter(function(p) p$category %in% basic_specs, panels)
             }
 
-            specs <- unique(vapply(panels, `[[`, character(1L), "category"))
-            choices <- list()
-            for (spec in specs) {
-              spec_panels <- Filter(function(p) p$category == spec, panels)
-              choices[[spec]] <- stats::setNames(
-                vapply(spec_panels, `[[`, character(1L), "id"),
-                vapply(spec_panels, function(p) {
-                  paste0(p$id, " \u2014 ", p$description)
-                }, character(1L))
+            lapply(unname(panels), function(p) {
+              list(
+                value = p$id,
+                label = p$id,
+                description = p$description,
+                group = p$category,
+                meta = p$category
               )
-            }
-            choices
+            })
           })
 
+          # Send items to client whenever they change
           shiny::observe({
-            choices <- r_choices()
-            shiny::updateSelectizeInput(
-              session, "series",
-              choices = choices,
-              selected = shiny::isolate(r_series()),
-              server = FALSE
+            items <- r_items()
+            session$sendCustomMessage(
+              ns("sx_set_items"),
+              list(items = items, selected = shiny::isolate(r_series()))
             )
           })
 
-          shiny::observeEvent(input$series, {
-            r_series(input$series)
+          # Receive selection from client
+          shiny::observeEvent(input$sx_series, {
+            r_series(input$sx_series)
           })
 
+          # Advanced toggle
           shiny::observeEvent(input$advanced, {
             r_advanced(isTRUE(input$advanced))
+            # Re-send items with new filter
           })
 
           # Render chart
@@ -94,8 +98,7 @@ new_series_explorer_block <- function(series = "final",
 
             if (!sel %in% names(panels)) {
               return(sx_empty_chart(
-                paste0("Series \"", sel,
-                       "\" not available for this model")
+                paste0("Series \"", sel, "\" not available for this model")
               ))
             }
 
@@ -111,10 +114,9 @@ new_series_explorer_block <- function(series = "final",
           list(
             expr = shiny::reactive({
               selected_series <- r_series()
-              expr_text <- glue::glue(
-                "tsbox::ts_tbl(blockr.seasonal:::sx_extract_series(data, '{selected_series}'))"
-              )
-              parse(text = expr_text)[[1]]
+              parse(text = glue::glue(
+                "tsbox::ts_tbl(blockr.seasonal:::sx_extract_series(.(`1`), '{selected_series}'))"
+              ))[[1]]
             }),
             state = list(
               series = r_series,
@@ -127,97 +129,20 @@ new_series_explorer_block <- function(series = "final",
     ui = function(id) {
       ns <- shiny::NS(id)
 
-      # Build the color map as JSON for the JS render function
+      # Group colors for the SelectRich
       colors_json <- jsonlite::toJSON(sx_spec_colors(), auto_unbox = TRUE)
 
-      # SVG path for graph-up icon
-      icon_path <- paste0(
-        '<path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm14.817 3.113a.5',
-        '.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656',
-        ' 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 ',
-        '2.61 4.15-5.073a.5.5 0 0 1 .704-.07"/>'
-      )
-
       shiny::tagList(
+        blockr_core_js_dep(),
+        blockr_select_rich_dep(),
         sx_explorer_css(),
         shiny::div(
           class = "sx-block",
 
-          # Top row: selectize + advanced toggle
+          # Top row: SelectRich container + advanced toggle
           shiny::div(class = "sx-top-row",
             shiny::div(class = "sx-select-wrap",
-              shiny::selectizeInput(
-                ns("series"),
-                label = NULL,
-                choices = NULL,
-                width = "100%",
-                options = list(
-                  placeholder = "Search series...",
-                  searchField = c("label", "value"),
-                  maxOptions = 500,
-                  render = I(sprintf("
-                    (function() {
-                      var specColors = %s;
-                      var iconPath = '%s';
-
-                      var hexToRgba = function(hex, alpha) {
-                        var r = parseInt(hex.slice(1,3), 16);
-                        var g = parseInt(hex.slice(3,5), 16);
-                        var b = parseInt(hex.slice(5,7), 16);
-                        return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
-                      };
-
-                      var makeSvg = function(color, size) {
-                        return '<svg xmlns=\"http://www.w3.org/2000/svg\" ' +
-                          'width=\"' + size + '\" height=\"' + size + '\" ' +
-                          'fill=\"' + color + '\" viewBox=\"0 0 16 16\">' +
-                          iconPath + '</svg>';
-                      };
-
-                      return {
-                        option: function(item, escape) {
-                          var label = item.label || item.value;
-                          var parts = label.split(' \\u2014 ');
-                          var code = parts[0] || item.value;
-                          var desc = parts.length > 1 ? parts.slice(1).join(' ') : '';
-                          var optgroup = item.optgroup || '';
-                          var color = specColors[optgroup] || '#64748b';
-                          var bgColor = hexToRgba(color, 0.15);
-
-                          return '<div class=\"sx-option\">' +
-                            '<div class=\"sx-option-icon\" style=\"background:' + bgColor + '\">' +
-                              makeSvg(color, 18) +
-                            '</div>' +
-                            '<div class=\"sx-option-content\">' +
-                              '<div class=\"sx-option-header\">' +
-                                '<span class=\"sx-option-name\">' + escape(code) + '</span>' +
-                                '<span class=\"sx-option-cat\">' + escape(optgroup) + '</span>' +
-                              '</div>' +
-                              (desc ? '<div class=\"sx-option-desc\">' + escape(desc) + '</div>' : '') +
-                            '</div>' +
-                          '</div>';
-                        },
-                        item: function(item, escape) {
-                          var label = item.label || item.value;
-                          var parts = label.split(' \\u2014 ');
-                          var code = parts[0] || item.value;
-                          var desc = parts.length > 1 ? parts.slice(1).join(' ') : '';
-                          var optgroup = item.optgroup || '';
-                          var color = specColors[optgroup] || '#64748b';
-                          var bgColor = hexToRgba(color, 0.15);
-
-                          return '<div class=\"sx-item-selected\">' +
-                            '<div class=\"sx-item-icon\" style=\"background:' + bgColor + '\">' +
-                              makeSvg(color, 12) +
-                            '</div>' +
-                            '<span class=\"sx-item-name\">' + escape(code) + '</span>' +
-                            '<span class=\"sx-item-desc\">' + escape(desc) + '</span>' +
-                          '</div>';
-                        }
-                      };
-                    })()", colors_json, icon_path))
-                )
-              )
+              shiny::div(id = ns("sx_select_container"))
             ),
             shiny::div(class = "sx-adv-wrap",
               shiny::tags$label(class = "sx-adv-label",
@@ -235,14 +160,53 @@ new_series_explorer_block <- function(series = "final",
           shiny::div(class = "sx-chart-wrap",
             shiny::uiOutput(ns("chart"))
           )
-        )
+        ),
+
+        # JS: create SelectRich and wire to Shiny
+        shiny::tags$script(shiny::HTML(sprintf("
+          $(function() {
+            var containerId = '%s';
+            var setItemsMsgId = '%s';
+            var inputId = '%s';
+            var groupColors = %s;
+
+            var srich = null;
+
+            // Create SelectRich once the container exists
+            var initInterval = setInterval(function() {
+              var container = document.getElementById(containerId);
+              if (!container || typeof Blockr === 'undefined' || !Blockr.SelectRich) return;
+              clearInterval(initInterval);
+
+              srich = Blockr.SelectRich.create(container, {
+                items: [],
+                selected: null,
+                placeholder: 'Search series\\u2026',
+                groupColors: groupColors,
+                onChange: function(value) {
+                  Shiny.setInputValue(inputId, value, {priority: 'event'});
+                }
+              });
+            }, 100);
+
+            // Receive items from server
+            Shiny.addCustomMessageHandler(setItemsMsgId, function(msg) {
+              if (!srich) return;
+              srich.setItems(msg.items || []);
+              if (msg.selected) srich.setValue(msg.selected);
+            });
+          });
+        ", ns("sx_select_container"), ns("sx_set_items"), ns("sx_series"),
+           colors_json)))
       )
     },
-    dat_valid = function(data) {
-      if (!inherits(data, "seas")) {
+    dat_valid = function(...args) {
+      stopifnot(length(...args) >= 1L)
+      if (!inherits(...args[[1]], "seas")) {
         stop("Input must be a seas model object")
       }
     },
+    expr_type = "bquoted",
     class = "series_explorer_block",
     ...
   )

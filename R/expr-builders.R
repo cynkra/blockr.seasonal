@@ -11,17 +11,26 @@ NULL
 #' @param has_xtrans Logical, whether xtrans input is connected.
 #' @return A language object wrapping a seasonal::seas() call.
 #' @noRd
-make_seas_expr <- function(args, has_xreg = FALSE, has_xtrans = FALSE) {
+make_seas_expr <- function(args, has_xreg = FALSE, has_xtrans = FALSE,
+                           arg_names = c(x = "1")) {
   catalog <- get_x13_catalog()
 
   # Build the seas() call: seasonal::seas(x, ...)
+  # arg_names maps semantic names ("x", "xreg", "xtrans") to positional
+  # input names ("1", "2", "3") from the variadic ...args
+  x_sym <- as.name(arg_names[["x"]])
+  # seas(x = x) — use the local variable created by x <- tsbox::ts_ts(...)
   call_args <- list(
     str2lang("seasonal::seas"),
-    x = quote(.(x))
+    x = quote(x)
   )
 
-  if (has_xreg) call_args[["xreg"]] <- quote(.(xreg))
-  if (has_xtrans) call_args[["xtrans"]] <- quote(.(xtrans))
+  if (has_xreg && "xreg" %in% names(arg_names)) {
+    call_args[["xreg"]] <- call(".", as.name(arg_names[["xreg"]]))
+  }
+  if (has_xtrans && "xtrans" %in% names(arg_names)) {
+    call_args[["xtrans"]] <- call(".", as.name(arg_names[["xtrans"]]))
+  }
 
   # Add each user argument with type coercion
   for (a in args) {
@@ -58,11 +67,12 @@ make_seas_expr <- function(args, has_xreg = FALSE, has_xtrans = FALSE) {
   seas_call <- as.call(call_args)
 
   # Wrap in local() with ts conversion
+  x_dot <- call(".", x_sym)
   blockr.core::bbquote(
     local({
-      x <- tsbox::ts_ts(.(x))
+      x <- tsbox::ts_ts(.(x_ref))
       .(seas_call)
     }),
-    list(seas_call = seas_call)
+    list(seas_call = seas_call, x_ref = x_dot)
   )
 }

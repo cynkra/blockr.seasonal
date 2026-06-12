@@ -68,38 +68,6 @@ sx_model_method <- function(model) {
   if (!is.null(model$spc$x11)) "x11" else "seats"
 }
 
-# -- Icon helper ---------------------------------------------------------------
-
-#' @noRd
-sx_icon_html <- function(icon_name, color) {
-  icons <- list(
-    `graph-up` = paste0(
-      '<path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm14.817 3.113a.5',
-      '.5 0 0 1 .07.704l-4.5 5.5a.5.5 0 0 1-.74.037L7.06 6.767l-3.656',
-      ' 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 ',
-      '2.61 4.15-5.073a.5.5 0 0 1 .704-.07"/>'
-    )
-  )
-
-  svg_path <- icons[[icon_name]] %||% icons[["graph-up"]]
-
-  hex <- sub("^#", "", color)
-  r <- strtoi(substr(hex, 1, 2), 16L)
-  g <- strtoi(substr(hex, 3, 4), 16L)
-  b <- strtoi(substr(hex, 5, 6), 16L)
-  bg_rgba <- sprintf("rgba(%d,%d,%d,0.15)", r, g, b)
-
-  sprintf(
-    paste0(
-      '<div style="width:40px;height:40px;border-radius:7px;background:%s;',
-      'display:flex;align-items:center;justify-content:center;flex-shrink:0">',
-      '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" ',
-      'fill="%s" viewBox="0 0 16 16">%s</svg></div>'
-    ),
-    bg_rgba, color, svg_path
-  )
-}
-
 # -- Series extraction ---------------------------------------------------------
 
 #' Extract a series from a seas model
@@ -229,7 +197,6 @@ series_explorer_panels <- function() {
       description = row$description,
       category = spec,
       method = method,
-      icon = "graph-up",
       color = color,
       render = local({
         .code <- code

@@ -16,8 +16,7 @@ board <- blockr.dock::new_dock_board(
   ),
   links = blockr.core::links(
     from = c("data", "seas"),
-    to = c("seas", "explorer"),
-    input = c("x", "data")
+    to = c("seas", "explorer")
   ),
   extensions = list(
     blockr.dag::new_dag_extension()

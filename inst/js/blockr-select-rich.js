@@ -23,6 +23,10 @@
     let selected = config.selected || null;
     const placeholder = config.placeholder || 'Select\u2026';
     const onChange = config.onChange || null;
+    const groupColors = config.groupColors || {};
+    const groupIcons = config.groupIcons || {};
+    const hasIcons = Object.keys(groupColors).length > 0;
+    const defaultColor = '#64748b';
     let _isOpen = false;
     let searchQuery = '';
     let highlightIdx = 0;
@@ -70,6 +74,19 @@
 
     container.appendChild(root);
 
+    // --- Color & icon helpers ---
+
+    const hexToRgba = (hex, alpha) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    };
+
+    const getGroupColor = (group) => {
+      return groupColors[group] || defaultColor;
+    };
+
     // --- Helpers ---
 
     const getFiltered = () => {
@@ -103,10 +120,34 @@
     // --- Rendering ---
 
     const render = () => {
+      valueEl.innerHTML = '';
       const item = getSelectedItem();
       if (item) {
-        valueEl.textContent = item.label || item.value;
         valueEl.classList.remove('blockr-srich__value--placeholder');
+        // Compact icon (only when groupColors configured)
+        if (hasIcons) {
+          const color = getGroupColor(item.group || item.meta);
+          const iconEl = document.createElement('span');
+          iconEl.className = 'blockr-srich__value-icon';
+          iconEl.style.borderColor = color;
+          const grpIcon = groupIcons[item.group] || groupIcons[item.meta];
+          if (grpIcon) {
+            iconEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" style="color:${color}">${grpIcon}</svg>`;
+          }
+          valueEl.appendChild(iconEl);
+        }
+        // Primary: human label
+        const primary = document.createElement('span');
+        primary.className = 'blockr-srich__value-primary';
+        primary.textContent = item.label || item.value;
+        valueEl.appendChild(primary);
+        // Secondary: code name if different
+        if (item.value && item.value !== item.label) {
+          const secondary = document.createElement('span');
+          secondary.className = 'blockr-srich__value-secondary';
+          secondary.textContent = item.value;
+          valueEl.appendChild(secondary);
+        }
       } else {
         valueEl.textContent = placeholder;
         valueEl.classList.add('blockr-srich__value--placeholder');
@@ -127,8 +168,19 @@
       if (highlightIdx >= filtered.length) highlightIdx = filtered.length - 1;
       if (highlightIdx < 0) highlightIdx = 0;
 
+      let currentGroup = null;
       for (let i = 0; i < filtered.length; i++) {
         const item = filtered[i];
+
+        // Group header when group changes (only when not searching)
+        if (item.group && item.group !== currentGroup && !searchQuery) {
+          currentGroup = item.group;
+          const header = document.createElement('div');
+          header.className = 'blockr-srich__group-header';
+          header.textContent = currentGroup;
+          dropdown.appendChild(header);
+        }
+
         const opt = document.createElement('div');
         opt.className = 'blockr-srich__option';
         if (i === highlightIdx) opt.className += ' blockr-srich__option--highlighted';
@@ -136,32 +188,56 @@
         opt.setAttribute('role', 'option');
         opt.setAttribute('data-value', item.value);
 
-        // Line 1: label + meta
-        const line1 = document.createElement('div');
-        line1.className = 'blockr-srich__option-line1';
+        // Icon square (only when groupColors configured)
+        if (hasIcons) {
+          const color = getGroupColor(item.group || item.meta);
+          const iconEl = document.createElement('div');
+          iconEl.className = 'blockr-srich__option-icon';
+          iconEl.style.borderColor = color;
+          const grpIcon = groupIcons[item.group] || groupIcons[item.meta];
+          if (grpIcon) {
+            iconEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" style="color:${color}">${grpIcon}</svg>`;
+          }
+          opt.appendChild(iconEl);
+        }
+
+        // Content: header + description
+        const content = document.createElement('div');
+        content.className = 'blockr-srich__option-content';
+
+        const header = document.createElement('div');
+        header.className = 'blockr-srich__option-header';
 
         const label = document.createElement('span');
         label.className = 'blockr-srich__option-label';
         label.textContent = item.label || item.value;
-        line1.appendChild(label);
+        header.appendChild(label);
+
+        // Show actual value in mono when different from label
+        if (item.value && item.label && item.value !== item.label) {
+          const code = document.createElement('span');
+          code.className = 'blockr-srich__option-code';
+          code.textContent = item.value;
+          header.appendChild(code);
+        }
 
         if (item.meta) {
           const meta = document.createElement('span');
           meta.className = 'blockr-srich__option-meta';
           meta.textContent = item.meta;
-          line1.appendChild(meta);
+          header.appendChild(meta);
         }
 
-        opt.appendChild(line1);
+        content.appendChild(header);
 
-        // Line 2: description
         if (item.description) {
           const desc = document.createElement('div');
           desc.className = 'blockr-srich__option-desc';
           desc.textContent = item.description;
-          opt.appendChild(desc);
+          content.appendChild(desc);
         }
 
+        opt.appendChild(content);
         dropdown.appendChild(opt);
       }
 

@@ -4,10 +4,9 @@
 #' Each argument is entered as a separate row with autocomplete and adaptive
 #' value inputs driven by the X-13 argument catalog.
 #'
-#' The block accepts three inputs:
-#' - x: The main time series (required)
-#' - xreg: External regressors (optional)
-#' - xtrans: Transformation variables (optional)
+#' The block is variadic: the first connected input is the main time series,
+#' the second (optional) is external regressors (xreg), and the third
+#' (optional) is transformation variables (xtrans).
 #'
 #' @param state List with `args` (array of objects with `name` and `value`).
 #'   Each argument becomes a parameter in the `seasonal::seas()` call.
@@ -36,11 +35,16 @@ new_seas_block <- function(
   ...
 ) {
   blockr.core::new_transform_block(
-    # -- server ---------------------------------------------------------------
-    server = function(id, x, xreg = reactive(NULL), xtrans = reactive(NULL)) {
+    # -- server (variadic: 1=x, 2=xreg, 3=xtrans) ---------------------------
+    server = function(id, ...args) {
       moduleServer(id, function(input, output, session) {
         ns <- session$ns
         r_state <- reactiveVal(state)
+
+        # Map variadic positional inputs
+        n_inputs <- reactive(length(names(...args)))
+        has_xreg <- reactive(n_inputs() >= 2L)
+        has_xtrans <- reactive(n_inputs() >= 3L)
 
         # Bidirectional sync
         self_write <- new.env(parent = emptyenv())
@@ -53,13 +57,13 @@ new_seas_block <- function(
             list(id = ns("seas_input"), catalog = catalog))
         }, priority = 100)
 
-        # Send connection status when xreg/xtrans change
+        # Send connection status
         observe({
           session$sendCustomMessage("seas-connections",
             list(
               id = ns("seas_input"),
-              xreg = !is.null(xreg()),
-              xtrans = !is.null(xtrans())
+              xreg = has_xreg(),
+              xtrans = has_xtrans()
             ))
         })
 
@@ -78,13 +82,25 @@ new_seas_block <- function(
           }
         })
 
+        # Build input name mapping for expression
+        arg_names <- reactive({
+          nms <- names(...args)
+          # Map positional names to semantic names for seas()
+          mapped <- character(length(nms))
+          mapped[1] <- "x"
+          if (length(nms) >= 2) mapped[2] <- "xreg"
+          if (length(nms) >= 3) mapped[3] <- "xtrans"
+          stats::setNames(nms, mapped)
+        })
+
         list(
           expr = reactive({
             s <- r_state()
             make_seas_expr(
               s$args %||% list(),
-              has_xreg = !is.null(xreg()),
-              has_xtrans = !is.null(xtrans())
+              has_xreg = has_xreg(),
+              has_xtrans = has_xtrans(),
+              arg_names = arg_names()
             )
           }),
           state = list(state = r_state)
