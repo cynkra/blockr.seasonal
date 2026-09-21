@@ -14,9 +14,10 @@ new_monthplot_block <- function(...) {
         function(input, output, session) {
           list(
             expr = reactive({
-              # Simple expression: call monthplot on the seas model
-              # monthplot.seas S3 method will be dispatched automatically
-              expr_text <- "monthplot(data)"
+              # The generic lives in stats, the seas method in seasonal, and
+              # the expression runs in a session that attaches neither: qualify
+              # the generic and S3 dispatch finds monthplot.seas from there.
+              expr_text <- "stats::monthplot(data)"
               parse(text = expr_text)[[1]]
             }),
             state = list()

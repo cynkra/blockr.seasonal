@@ -38,59 +38,26 @@ new_seas_block <- function(
     # -- server (variadic: 1=x, 2=xreg, 3=xtrans) ---------------------------
     server = function(id, ...args) {
       moduleServer(id, function(input, output, session) {
-        ns <- session$ns
-        r_state <- reactiveVal(state)
 
-        # Map variadic positional inputs
-        n_inputs <- reactive(length(names(...args)))
+        # Variadic slots, in order: 1 = x, 2 = xreg, 3 = xtrans.
+        n_inputs <- reactive(length(...args))
         has_xreg <- reactive(n_inputs() >= 2L)
         has_xtrans <- reactive(n_inputs() >= 3L)
 
-        # Bidirectional sync
-        self_write <- new.env(parent = emptyenv())
-        self_write$active <- FALSE
+        r_state <- seas_args_server(input, session, state, has_xreg, has_xtrans)
 
-        # Send catalog to JS on init
-        observe({
-          catalog <- get_x13_catalog()
-          session$sendCustomMessage("seas-catalog",
-            list(id = ns("seas_input"), catalog = catalog))
-        }, priority = 100)
-
-        # Send connection status
-        observe({
-          session$sendCustomMessage("seas-connections",
-            list(
-              id = ns("seas_input"),
-              xreg = has_xreg(),
-              xtrans = has_xtrans()
-            ))
-        })
-
-        # JS -> R: user changed arguments
-        observeEvent(input$seas_input, {
-          self_write$active <- TRUE
-          r_state(input$seas_input)
-          self_write$active <- FALSE
-        })
-
-        # R -> JS: external control changed state
-        observeEvent(r_state(), {
-          if (!self_write$active) {
-            session$sendCustomMessage("seas-block-update",
-              list(id = ns("seas_input"), state = r_state()))
-          }
-        })
-
-        # Build input name mapping for expression
+        # Map the slots onto seas()'s semantic arguments, by the symbol each
+        # input is bound to rather than by its position name.
         arg_names <- reactive({
-          nms <- names(...args)
-          # Map positional names to semantic names for seas()
-          mapped <- character(length(nms))
+          refs <- dot_refs(...args)
+          if (!length(refs)) {
+            return(stats::setNames(character(), character()))
+          }
+          mapped <- character(length(refs))
           mapped[1] <- "x"
-          if (length(nms) >= 2) mapped[2] <- "xreg"
-          if (length(nms) >= 3) mapped[3] <- "xtrans"
-          stats::setNames(nms, mapped)
+          if (length(refs) >= 2) mapped[2] <- "xreg"
+          if (length(refs) >= 3) mapped[3] <- "xtrans"
+          stats::setNames(refs, mapped)
         })
 
         list(
@@ -108,22 +75,7 @@ new_seas_block <- function(
       })
     },
     # -- ui -------------------------------------------------------------------
-    ui = function(id) {
-      tagList(
-        blockr_core_js_dep(),
-        blockr_blocks_css_dep(),
-        blockr_select_dep(),
-        blockr_select_rich_dep(),
-        seas_block_dep(),
-        div(
-          class = "block-container",
-          div(
-            id = NS(id, "seas_input"),
-            class = "seas-block-container"
-          )
-        )
-      )
-    },
+    ui = seas_args_ui,
     class = "seas_block",
     expr_type = "bquoted",
     external_ctrl = TRUE,

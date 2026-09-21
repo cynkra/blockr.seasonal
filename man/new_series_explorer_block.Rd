@@ -31,12 +31,8 @@ new_series_explorer_block(series = "final", advanced = FALSE, ...)
 A transform block of class \code{series_explorer_block}
 }
 \description{
-A searchable dropdown series picker with an echarts4r chart preview.
-Extracts the chosen component from a \code{seas} model and returns it
-as a \code{tsbox}-compatible data frame for downstream blocks.
-}
-\details{
-The dropdown automatically filters to show only series compatible with
-the current model method (SEATS or X-11).  An \emph{Advanced} toggle
-reveals diagnostic series that are hidden by default.
+A searchable dropdown series picker using \code{Blockr.SelectRich} with an
+echarts4r chart preview.  Extracts the chosen component from a \code{seas}
+model and returns it as a \code{tsbox}-compatible data frame for downstream
+blocks.
 }

@@ -18,12 +18,9 @@ Each argument is entered as a separate row with autocomplete and adaptive
 value inputs driven by the X-13 argument catalog.
 }
 \details{
-The block accepts three inputs:
-\itemize{
-\item x: The main time series (required)
-\item xreg: External regressors (optional)
-\item xtrans: Transformation variables (optional)
-}
+The block is variadic: the first connected input is the main time series,
+the second (optional) is external regressors (xreg), and the third
+(optional) is transformation variables (xtrans).
 }
 \examples{
 if (interactive()) {

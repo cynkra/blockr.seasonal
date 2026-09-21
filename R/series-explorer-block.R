@@ -33,11 +33,24 @@ new_series_explorer_block <- function(series = "final",
             sx_model_method(model)
           })
 
-          # Helper: get data from first variadic input
+          # Helper: get data from first variadic input. Indexed by POSITION,
+          # not by the name "1": blockr.core names unnamed variadic slots
+          # `.arg1`, `.arg2`, ... and a named link keeps its own name, so no
+          # literal slot name is safe to hard-code.
           data <- shiny::reactive({
-            d <- ...args[["1"]]
+            shiny::req(length(...args) >= 1L)
+            d <- ...args[[1]]
             shiny::req(d)
             d
+          })
+
+          # The symbol the first input is bound to inside the expression.
+          # Mirrors `blockr.core:::dot_arg_refs()`, which is internal.
+          input_ref <- shiny::reactive({
+            nms <- names(...args)
+            if (is.null(nms)) nms <- character(length(...args))
+            shiny::req(length(nms) >= 1L)
+            if (nzchar(nms[1])) nms[1] else ".arg1"
           })
 
           r_panels <- shiny::reactive({
@@ -114,8 +127,9 @@ new_series_explorer_block <- function(series = "final",
           list(
             expr = shiny::reactive({
               selected_series <- r_series()
+              ref <- input_ref()
               parse(text = glue::glue(
-                "tsbox::ts_tbl(blockr.seasonal:::sx_extract_series(.(`1`), '{selected_series}'))"
+                "tsbox::ts_tbl(blockr.seasonal:::sx_extract_series(.(`{ref}`), '{selected_series}'))"
               ))[[1]]
             }),
             state = list(
