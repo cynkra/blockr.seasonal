@@ -7,7 +7,7 @@
 #' @param series Which series to extract. Can be standard components like
 #'   "final", "seasonal", "trend", "irregular", "original" or any X-13
 #'   series code (e.g., "d10", "d11", "d12", "d13", etc.)
-#' @param ... Additional arguments passed to new_ts_transform_block
+#' @param ... Additional arguments passed to [blockr.core::new_transform_block()]
 #'
 #' @export
 new_series_block <- function(series = "final", ...) {
@@ -35,7 +35,11 @@ new_series_block <- function(series = "final", ...) {
     )
   }
 
-  blockr.ts::new_ts_transform_block(
+  # blockr.ts::new_ts_transform_block() used to be a virtual constructor that
+  # added the dygraph classes. It is now the sixteen-verb block, and the chart
+  # comes from blockr.ts::ts_display dispatching on the DATA, so there is
+  # nothing left for a base class to add.
+  blockr.core::new_transform_block(
     server = function(id, data) {
       moduleServer(
         id,

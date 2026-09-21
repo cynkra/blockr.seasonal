@@ -5,11 +5,15 @@
 #'
 #' @param include_original Logical. Include the original series alongside the adjusted series (default: TRUE)
 #' @param show_outliers Logical. Display outlier annotations on the plot (default: TRUE)
-#' @param ... Additional arguments passed to new_ts_transform_block
+#' @param ... Additional arguments passed to [blockr.core::new_transform_block()]
 #'
 #' @export
 new_final_block <- function(include_original = TRUE, show_outliers = TRUE, ...) {
-  blockr.ts::new_ts_transform_block(
+  # blockr.ts::new_ts_transform_block() used to be a virtual constructor that
+  # added the dygraph classes. It is now the sixteen-verb block, and the chart
+  # comes from blockr.ts::ts_display dispatching on the DATA, so there is
+  # nothing left for a base class to add.
+  blockr.core::new_transform_block(
     server = function(id, data) {
       moduleServer(
         id,
