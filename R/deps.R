@@ -10,7 +10,7 @@ NULL
 blockr_core_js_dep <- function() {
   htmltools::htmlDependency(
     name = "blockr-core-js",
-    version = utils::packageVersion("blockr.seasonal"),
+    version = seas_asset_version(),
     src = system.file("js", package = "blockr.seasonal"),
     script = "blockr-core.js"
   )
@@ -22,7 +22,7 @@ blockr_core_js_dep <- function() {
 blockr_blocks_css_dep <- function() {
   htmltools::htmlDependency(
     name = "blockr-blocks-css",
-    version = utils::packageVersion("blockr.seasonal"),
+    version = seas_asset_version(),
     src = system.file("css", package = "blockr.seasonal"),
     stylesheet = "blockr-blocks.css"
   )
@@ -36,13 +36,13 @@ blockr_select_dep <- function() {
     blockr_core_js_dep(),
     htmltools::htmlDependency(
       name = "blockr-select-js",
-      version = utils::packageVersion("blockr.seasonal"),
+      version = seas_asset_version(),
       src = system.file("js", package = "blockr.seasonal"),
       script = "blockr-select.js"
     ),
     htmltools::htmlDependency(
       name = "blockr-select-css",
-      version = utils::packageVersion("blockr.seasonal"),
+      version = seas_asset_version(),
       src = system.file("css", package = "blockr.seasonal"),
       stylesheet = "blockr-select.css"
     )
@@ -56,7 +56,7 @@ blockr_select_dep <- function() {
 seas_summary_css_dep <- function() {
   htmltools::htmlDependency(
     name = "seas-summary-css",
-    version = utils::packageVersion("blockr.seasonal"),
+    version = seas_asset_version(),
     src = system.file("css", package = "blockr.seasonal"),
     stylesheet = "seas-summary.css"
   )

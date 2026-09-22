@@ -170,7 +170,7 @@ seas_chip <- function(p) {
 seas_card_css_dep <- function() {
   htmltools::htmlDependency(
     name = "seas-card-css",
-    version = utils::packageVersion("blockr.seasonal"),
+    version = seas_asset_version(),
     src = system.file("css", package = "blockr.seasonal"),
     stylesheet = "seas-card.css"
   )

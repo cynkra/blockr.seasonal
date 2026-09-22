@@ -1,3 +1,19 @@
+
+#' The version the block's own assets are served under
+#'
+#' Shiny serves an `htmlDependency` under a path containing its version, so a
+#' browser that has seen `seas-args-js-0.0.1/seas-args.js` keeps that copy
+#' until the string changes. `packageVersion()` does not change during
+#' development, which is exactly when these files change, so a reinstall
+#' looks like it did nothing and the browser keeps showing yesterday's UI.
+#'
+#' BUMP THIS BY HAND whenever anything in `inst/js` or `inst/css` changes.
+#' Same reason and same shape as `blockr.ts::ts_asset_version()`.
+#' @noRd
+seas_asset_version <- function() {
+  "0.12.1"
+}
+
 #' The catalogue select
 #'
 #' `Blockr.SelectCatalog`, for lists that are long, categorised and described:
@@ -38,13 +54,13 @@ blockr_select_catalog_dep <- function() {
     blockr_core_js_dep(),
     htmltools::htmlDependency(
       name = "blockr-select-catalog-js",
-      version = utils::packageVersion("blockr.seasonal"),
+      version = seas_asset_version(),
       src = system.file("js", package = "blockr.seasonal"),
       script = "blockr-select-catalog.js"
     ),
     htmltools::htmlDependency(
       name = "blockr-select-catalog-css",
-      version = utils::packageVersion("blockr.seasonal"),
+      version = seas_asset_version(),
       src = system.file("css", package = "blockr.seasonal"),
       stylesheet = "blockr-select-catalog.css"
     )
@@ -60,13 +76,13 @@ seas_args_dep <- function() {
   htmltools::tagList(
     htmltools::htmlDependency(
       name = "seas-args-js",
-      version = utils::packageVersion("blockr.seasonal"),
+      version = seas_asset_version(),
       src = system.file("js", package = "blockr.seasonal"),
       script = "seas-args.js"
     ),
     htmltools::htmlDependency(
       name = "seas-args-css",
-      version = utils::packageVersion("blockr.seasonal"),
+      version = seas_asset_version(),
       src = system.file("css", package = "blockr.seasonal"),
       stylesheet = "seas-args.css"
     )
