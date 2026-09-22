@@ -18,7 +18,7 @@
 #' means the worst month is further than `ref_crit` percent from `reference`.
 #'
 #' @param models Named list of `seas` models, as returned by
-#'   [new_seas_multi_block()]. Elements that are conditions rather than models
+#'   [new_seas_block()]. Elements that are conditions rather than models
 #'   are reported as failed rather than dropped.
 #' @param reference Optional long data frame holding an adjustment to compare
 #'   against: a series column, a time column and a numeric value column.

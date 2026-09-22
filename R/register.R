@@ -7,7 +7,6 @@ register_seasonal_blocks <- function() {
   blockr.core::register_blocks(
     c(
       "new_seas_block",
-      "new_seas_multi_block",
       "new_seas_triage_block",
       "new_monthplot_block",
       "new_seas_series_block",
@@ -17,7 +16,6 @@ register_seasonal_blocks <- function() {
     ),
     name = c(
       "Seasonal Adjustment",
-      "Seasonal Adjustment (many series)",
       "Triage Table",
       "Monthplot",
       "Seas series",
@@ -27,7 +25,6 @@ register_seasonal_blocks <- function() {
     ),
     description = c(
       "Perform seasonal adjustment using X-13ARIMA-SEATS",
-      "Adjust every series in a long data frame with one specification",
       "One sorted row per series: model, diagnostics, and distance from a reference",
       "Display seasonal patterns by month",
       "One series out of a fitted X-13 model: 217 codes, searched by description",
@@ -36,7 +33,6 @@ register_seasonal_blocks <- function() {
       "Enhanced model diagnostics and statistical tests"
     ),
     category = c(
-      "transform",
       "transform",
       "table",
       "plot",

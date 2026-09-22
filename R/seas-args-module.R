@@ -1,10 +1,15 @@
-#' The X-13 argument builder, shared by the seas blocks
+#' The argument builder
 #'
-#' Both `new_seas_block()` and `new_seas_multi_block()` configure the same
-#' `seasonal::seas()` call through the same JS argument builder: one row per
-#' spec argument, autocompleted from the parsed X-13 manual. Only what they do
-#' with the resulting arguments differs, so the UI and the R-to-JS wiring live
-#' here and the blocks keep the expression.
+#' One control surface over one state. The state is the argument rows, a list
+#' of `list(name =, value =)`, and everything on screen is a view of them: the
+#' rows themselves, the sentence of suggestions above the picker, and the
+#' picker over the whole catalog. There is no second vocabulary and nothing to
+#' reconcile on restore.
+#'
+#' The client owns the editing and sends the rows back whole. R sends the
+#' catalog and the suggestions once, on mount, and pushes rows down again only
+#' when something other than the client wrote them -- a restored board, or
+#' another block through `external_ctrl`.
 #'
 #' @name seas-args-module
 #' @keywords internal
@@ -14,20 +19,30 @@ NULL
 #'
 #' @param id Block namespace.
 #' @return A `tagList` carrying the dependencies and the empty container the
-#'   JS component mounts into.
+#'   client mounts into.
 #' @noRd
 seas_args_ui <- function(id) {
   htmltools::tagList(
-    blockr_core_js_dep(),
-    blockr_blocks_css_dep(),
-    blockr_select_dep(),
-    blockr_select_rich_dep(),
-    seas_block_dep(),
+    blockr_select_catalog_dep(),
+    seas_args_dep(),
     shiny::div(
       class = "block-container",
+      shiny::div(id = shiny::NS(id, "seas_input"), class = "seas-args"),
+
+      # THE EXPRESSION, BETWEEN WHAT YOU SET AND WHAT CAME OUT. Its own band
+      # rather than another row, because it is not an input: the arguments
+      # above write it and core runs it, and putting it among them would make
+      # it look like one more thing to fill in.
+      #
+      # This belongs in blockr.ui, not here. Every block writes an expression,
+      # so "let me see it" is general, and blockr.core answers it today only
+      # with a board-wide modal (`generate_code_ui()`). Built here to find out
+      # how it feels; see the inbox note.
       shiny::div(
-        id = shiny::NS(id, "seas_input"),
-        class = "seas-block-container"
+        class = "seas-expr",
+        shiny::textOutput(shiny::NS(id, "seas_expr"), container = function(...) {
+          htmltools::tags$pre(class = "seas-expr__code", ...)
+        })
       )
     )
   )
@@ -35,57 +50,91 @@ seas_args_ui <- function(id) {
 
 #' Server half of the argument builder
 #'
-#' Call from inside `moduleServer()`. Sends the catalog and the connection
-#' status to the client, and keeps `r_state` and the client in sync in both
-#' directions.
+#' Call from inside `moduleServer()`.
 #'
 #' @param input,session The module's `input` and `session`.
-#' @param state Initial state, a list with an `args` element.
+#' @param args Initial argument rows, a list of `list(name =, value =)`.
 #' @param has_xreg,has_xtrans Reactives saying whether those inputs are
-#'   connected. The client greys the corresponding rows when they are not.
-#' @return A `reactiveVal` holding the block state.
+#'   connected. Kept for the variadic slots.
+#' @return A `reactiveVal` holding the argument rows. A reactiveVal and not a
+#'   reactive, because the block declares `external_ctrl = TRUE` and
+#'   blockr.core refuses state it cannot write back.
 #' @noRd
-seas_args_server <- function(input, session, state,
+seas_args_server <- function(input, session, args,
                              has_xreg = shiny::reactive(FALSE),
                              has_xtrans = shiny::reactive(FALSE)) {
   ns <- session$ns
-  r_state <- shiny::reactiveVal(state)
+  id <- ns("seas_input")
 
-  # Guards the R -> JS push while R is handling a JS -> R message, so a state
-  # change the client already knows about is not echoed back to it.
+  r_args <- shiny::reactiveVal(seas_rows(args))
+
+  # Guards the R -> client push while R is handling a client message: the
+  # client has already drawn its own edit, and re-rendering underneath a menu
+  # the user still has open would close it.
   self_write <- new.env(parent = emptyenv())
   self_write$active <- FALSE
 
+  # The catalog is 285 entries and never changes, so it goes once, on mount.
   shiny::observe({
-    session$sendCustomMessage(
-      "seas-catalog",
-      list(id = ns("seas_input"), catalog = get_x13_catalog())
-    )
+    session$sendCustomMessage("seas-args-init", list(
+      id = id,
+      catalog = get_x13_catalog(),
+      suggestions = seas_suggestions(),
+      open = as.list(seas_open_args()),
+      args = seas_rows(shiny::isolate(r_args()))
+    ))
   }, priority = 100)
-
-  shiny::observe({
-    session$sendCustomMessage(
-      "seas-connections",
-      list(id = ns("seas_input"), xreg = has_xreg(), xtrans = has_xtrans())
-    )
-  })
 
   shiny::observeEvent(input$seas_input, {
     self_write$active <- TRUE
-    r_state(input$seas_input)
+    r_args(seas_rows(input$seas_input$args))
     self_write$active <- FALSE
   })
 
-  shiny::observeEvent(r_state(), {
-    if (!self_write$active) {
-      session$sendCustomMessage(
-        "seas-block-update",
-        list(id = ns("seas_input"), state = r_state())
-      )
+  shiny::observeEvent(r_args(), {
+    if (self_write$active) {
+      return()
     }
-  })
+    session$sendCustomMessage("seas-args-update", list(
+      id = id, args = seas_rows(r_args())
+    ))
+  }, ignoreNULL = FALSE)
 
-  r_state
+  r_args
+}
+
+#' Arguments whose value list is known but does not close
+#'
+#' X-13 takes dated terms in these (`ao1951.may`, `rp1988.jan-1988.dec`), so
+#' their control has to accept a typed value beside the catalog's own.
+#' @noRd
+seas_open_args <- function() {
+  c("regression.variables", "x11regression.variables")
+}
+
+#' Argument rows, as R holds them
+#'
+#' The wire carries whatever JSON gave us: a row's `value` arrives as a string
+#' for a single value and as a list for a multi. Both are kept as they are --
+#' `seas_call_args()` reads the catalog to decide what a value becomes in the
+#' call, and a row that guessed here would guess differently there.
+#'
+#' What this does do is drop the shapes that are not rows at all, so a
+#' malformed message cannot reach the expression builder.
+#'
+#' @param x A list of rows, or `NULL`.
+#' @return A list of `list(name =, value =)`, possibly empty.
+#' @noRd
+seas_rows <- function(x) {
+  if (is.null(x) || !length(x)) {
+    return(list())
+  }
+  keep <- vapply(x, function(r) {
+    is.list(r) && length(r$name) == 1L && nzchar(as.character(r$name))
+  }, logical(1))
+  lapply(x[keep], function(r) {
+    list(name = as.character(r$name), value = r$value)
+  })
 }
 
 #' The symbols blockr.core binds variadic inputs to

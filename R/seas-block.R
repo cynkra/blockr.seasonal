@@ -8,8 +8,11 @@
 #' the second (optional) is external regressors (xreg), and the third
 #' (optional) is transformation variables (xtrans).
 #'
-#' @param state List with `args` (array of objects with `name` and `value`).
-#'   Each argument becomes a parameter in the `seasonal::seas()` call.
+#' @param args The argument rows, a list of `list(name =, value =)`. Each row
+#'   becomes one argument of the `seasonal::seas()` call, so
+#'   `list(list(name = "x11.mode", value = "mult"))` fits
+#'   `seas(x, x11.mode = "mult")`. The block's own state, flat, one formal:
+#'   there is no wrapper list around it.
 #' @param ... Additional arguments forwarded to [blockr.core::new_transform_block()]
 #'
 #' @examples
@@ -17,21 +20,20 @@
 #'   library(blockr.core)
 #'   serve(
 #'     new_seas_block(
-#'       state = list(args = list(
-#'         list(name = "x11.mode", value = "mult")
-#'       ))
+#'       args = list(list(name = "x11.mode", value = "mult"))
 #'     ),
 #'     data = list(x = tsbox::ts_tbl(datasets::AirPassengers))
 #'   )
 #' }
 #'
 #' @importFrom shiny moduleServer reactive reactiveVal observeEvent NS div
+#'   renderText
 #'   tagList
 #' @importFrom htmltools htmlDependency
 #'
 #' @export
 new_seas_block <- function(
-  state = list(args = list()),
+  args = list(),
   ...
 ) {
   blockr.core::new_transform_block(
@@ -44,7 +46,7 @@ new_seas_block <- function(
         has_xreg <- reactive(n_inputs() >= 2L)
         has_xtrans <- reactive(n_inputs() >= 3L)
 
-        r_state <- seas_args_server(input, session, state, has_xreg, has_xtrans)
+        r_args <- seas_args_server(input, session, args, has_xreg, has_xtrans)
 
         # Map the slots onto seas()'s semantic arguments, by the symbol each
         # input is bound to rather than by its position name.
@@ -60,17 +62,22 @@ new_seas_block <- function(
           stats::setNames(refs, mapped)
         })
 
+        r_expr <- reactive({
+          make_seas_expr(
+            r_args(),
+            has_xreg = has_xreg(),
+            has_xtrans = has_xtrans(),
+            arg_names = arg_names()
+          )
+        })
+
+        # The strip under the arguments. One reactive feeds both it and the
+        # block's expression, so what is on screen is what core evaluates.
+        output$seas_expr <- renderText(seas_expr_text(r_expr()))
+
         list(
-          expr = reactive({
-            s <- r_state()
-            make_seas_expr(
-              s$args %||% list(),
-              has_xreg = has_xreg(),
-              has_xtrans = has_xtrans(),
-              arg_names = arg_names()
-            )
-          }),
-          state = list(state = r_state)
+          expr = r_expr,
+          state = list(args = r_args)
         )
       })
     },
@@ -79,28 +86,7 @@ new_seas_block <- function(
     class = "seas_block",
     expr_type = "bquoted",
     external_ctrl = TRUE,
-    allow_empty_state = "state",
+    allow_empty_state = "args",
     ...
   )
-}
-
-#' @export
-block_ui.seas_block <- function(id, x, ...) {
-  tagList(
-    verbatimTextOutput(NS(id, "result"))
-  )
-}
-
-#' @export
-block_output.seas_block <- function(x, result, session) {
-  renderPrint({
-    if (is.null(result)) {
-      return(NULL)
-    }
-    if (inherits(result, "seas")) {
-      summary(result)
-    } else {
-      cat("No seasonal adjustment model available")
-    }
-  })
 }

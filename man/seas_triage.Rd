@@ -17,7 +17,7 @@ seas_triage(
 }
 \arguments{
 \item{models}{Named list of \code{seas} models, as returned by
-\code{\link[=new_seas_multi_block]{new_seas_multi_block()}}. Elements that are conditions rather than models
+\code{\link[=new_seas_block]{new_seas_block()}}. Elements that are conditions rather than models
 are reported as failed rather than dropped.}
 
 \item{reference}{Optional long data frame holding an adjustment to compare

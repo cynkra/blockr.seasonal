@@ -1,0 +1,137 @@
+/* The seas block's argument rows. Written against the blockr design system
+   tokens (blockr.docs/design-system), with literal fallbacks matching the
+   token values. No font-family on any container: block UI inherits the page
+   font, and the one family this hardcodes is the mono stack for code. */
+
+/* A ROW IS FULL WIDTH. Name and the manual's sentence share a line above, and
+   the control has the block: the values here are long -- tags for the
+   regression terms, strings with brackets for the ARIMA models -- and in a
+   fixed label column they wrapped. */
+.seas-row {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--blockr-color-border, #e5e7eb);
+}
+
+.seas-row__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.seas-row__head code {
+  font-family: var(--blockr-font-mono, 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace);
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-text-primary, #111827);
+  background: none;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.seas-row__head span {
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seas-row__rm {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  cursor: pointer;
+}
+
+.seas-row__rm:hover {
+  color: var(--blockr-color-text-secondary, #374151);
+}
+
+.seas-empty {
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  padding: 8px 0 4px;
+}
+
+/* The sentence. Ordinary prose, and the only clickable words are
+   seasonal.website's own option labels. */
+.seas-try {
+  padding: 12px 0 2px;
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  line-height: 1.6;
+  color: var(--blockr-color-text-muted, #6b7280);
+}
+
+.seas-try__link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-primary, #2563eb);
+  cursor: pointer;
+}
+
+.seas-try__link:hover {
+  color: var(--blockr-color-primary-hover, #1d4ed8);
+  text-decoration: underline;
+}
+
+.seas-add {
+  margin-top: 10px;
+}
+
+.seas-text {
+  width: 100%;
+  height: var(--blockr-control-h, 42px);
+  font: inherit;
+  font-size: var(--blockr-font-size-base, 0.875rem);
+  color: var(--blockr-color-text-primary, #111827);
+  background: var(--blockr-color-bg-input, #f9fafb);
+  border: 1px solid var(--blockr-color-border, #e5e7eb);
+  border-radius: var(--blockr-radius-lg, 8px);
+  padding: 0 11px;
+}
+
+.seas-text::placeholder {
+  color: var(--blockr-color-text-subtle, #9ca3af);
+}
+
+.seas-text:focus {
+  outline: none;
+  border-color: var(--blockr-color-primary, #2563eb);
+  box-shadow: var(--blockr-focus-ring, 0 0 0 3px rgba(37, 99, 235, 0.12));
+}
+
+/* THE EXPRESSION, between what you set and what came out. Its own band, so it
+   does not read as another input: the arguments above write it and core runs
+   it. Borrowed nothing from the rows on purpose -- the tint and the rule are
+   what say "this is a read-out".
+
+   This belongs in blockr.ui rather than here: every block writes an
+   expression, so a strip that shows it is general. Built in this package to
+   find out how it feels. */
+.seas-expr {
+  border-top: 1px solid var(--blockr-color-border, #e5e7eb);
+  background: var(--blockr-color-bg-subtle, #f9fafb);
+  margin: 14px -16px -12px;
+  padding: 10px 16px 12px;
+}
+
+.seas-expr__code {
+  margin: 0;
+  font-family: var(--blockr-font-mono, 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace);
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  line-height: 1.7;
+  color: var(--blockr-color-text-secondary, #374151);
+  background: none;
+  border: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

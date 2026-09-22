@@ -4,11 +4,14 @@
 \alias{new_seas_block}
 \title{Seasonal Adjustment Block (JS-driven argument builder)}
 \usage{
-new_seas_block(state = list(args = list()), ...)
+new_seas_block(args = list(), ...)
 }
 \arguments{
-\item{state}{List with \code{args} (array of objects with \code{name} and \code{value}).
-Each argument becomes a parameter in the \code{seasonal::seas()} call.}
+\item{args}{The argument rows, a list of \code{list(name =, value =)}. Each row
+becomes one argument of the \code{seasonal::seas()} call, so
+\code{list(list(name = "x11.mode", value = "mult"))} fits
+\code{seas(x, x11.mode = "mult")}. The block's own state, flat, one formal:
+there is no wrapper list around it.}
 
 \item{...}{Additional arguments forwarded to \code{\link[blockr.core:new_transform_block]{blockr.core::new_transform_block()}}}
 }
@@ -27,9 +30,7 @@ if (interactive()) {
   library(blockr.core)
   serve(
     new_seas_block(
-      state = list(args = list(
-        list(name = "x11.mode", value = "mult")
-      ))
+      args = list(list(name = "x11.mode", value = "mult"))
     ),
     data = list(x = tsbox::ts_tbl(datasets::AirPassengers))
   )

@@ -5,7 +5,7 @@
 #' how far each adjustment is from a reference you already trust.
 #'
 #' Variadic, in order: the first input is the list of models from
-#' [new_seas_multi_block()], the optional second is a long data frame holding
+#' [new_seas_block()], the optional second is a long data frame holding
 #' the adjustment to compare against, typically the statistical office's own
 #' published series.
 #'

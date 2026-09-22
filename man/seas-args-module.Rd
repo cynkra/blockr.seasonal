@@ -2,12 +2,18 @@
 % Please edit documentation in R/seas-args-module.R
 \name{seas-args-module}
 \alias{seas-args-module}
-\title{The X-13 argument builder, shared by the seas blocks}
+\title{The argument builder}
 \description{
-Both \code{new_seas_block()} and \code{new_seas_multi_block()} configure the same
-\code{seasonal::seas()} call through the same JS argument builder: one row per
-spec argument, autocompleted from the parsed X-13 manual. Only what they do
-with the resulting arguments differs, so the UI and the R-to-JS wiring live
-here and the blocks keep the expression.
+One control surface over one state. The state is the argument rows, a list
+of \code{list(name =, value =)}, and everything on screen is a view of them: the
+rows themselves, the sentence of suggestions above the picker, and the
+picker over the whole catalog. There is no second vocabulary and nothing to
+reconcile on restore.
+}
+\details{
+The client owns the editing and sends the rows back whole. R sends the
+catalog and the suggestions once, on mount, and pushes rows down again only
+when something other than the client wrote them -- a restored board, or
+another block through \code{external_ctrl}.
 }
 \keyword{internal}
