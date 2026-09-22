@@ -17,6 +17,7 @@ Imports:
     shiny,
     blockr.core (>= 0.0.1),
     blockr.ts,
+    broom,
     glue,
     seasonal,
     jsonlite,

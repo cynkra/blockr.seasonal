@@ -2,6 +2,8 @@
 
 S3method(block_output,summary_block)
 S3method(block_ui,summary_block)
+S3method(blockr.ts::ts_model_view,seas)
+S3method(blockr.ts::ts_model_view,seas_multi)
 S3method(blockr.ts::ts_resolve,seas)
 S3method(blockr.ts::ts_resolve,seas_multi)
 export(new_fivebestmdl_block)

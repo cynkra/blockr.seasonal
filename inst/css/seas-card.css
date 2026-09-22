@@ -1,0 +1,112 @@
+/* The model, read. Three columns: what it estimated, what it is, and whether
+   its residuals behave. Design system tokens with literal fallbacks; no
+   font-family on a container, mono only for code. */
+
+.seas-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 26px;
+  padding: 12px 16px 14px;
+}
+
+.seas-card--many {
+  display: block;
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-text-muted, #6b7280);
+}
+
+.seas-card--many code {
+  font-family: var(--blockr-font-mono, 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace);
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  color: var(--blockr-color-text-secondary, #374151);
+  background: none;
+  padding: 0;
+}
+
+.seas-card__col > .seas-kv:first-child {
+  border-top: 1px solid var(--blockr-color-border, #e5e7eb);
+}
+
+.seas-card__empty {
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  padding: 8px 0;
+}
+
+.seas-kv {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--blockr-grey-100, #f3f4f6);
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+}
+
+.seas-kv__k {
+  color: var(--blockr-color-text-muted, #6b7280);
+}
+
+.seas-kv__v {
+  margin-left: auto;
+  color: var(--blockr-color-text-primary, #111827);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.seas-kv__c {
+  width: 42px;
+  text-align: right;
+}
+
+/* A test carries its null hypothesis under its name: the statistic alone does
+   not say whether the test rejects. */
+.seas-kv--test {
+  align-items: flex-start;
+}
+
+.seas-kv--test .seas-kv__k {
+  display: flex;
+  flex-direction: column;
+  color: var(--blockr-color-text-primary, #111827);
+}
+
+.seas-kv--test em {
+  font-style: normal;
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  margin-top: 2px;
+}
+
+/* blockr.stats' chip ladder, unchanged: 0.1 / 1 / 5 per cent as one blue
+   alpha ramp, 10 per cent grey, nothing above that. Fixed box so only the
+   colour varies down the column. */
+.seas-chip {
+  display: inline-block;
+  box-sizing: border-box;
+  min-width: 4.1em;
+  padding: 2px 8px;
+  text-align: center;
+  font-size: 0.625rem;
+  border-radius: var(--blockr-radius-sm, 4px);
+  white-space: nowrap;
+  background-color: rgba(37, 99, 235, 0.22);
+  border: 1px solid rgba(37, 99, 235, 0.62);
+  color: var(--blockr-blue-700, #1d4ed8);
+}
+
+.seas-chip--1 {
+  background-color: rgba(37, 99, 235, 0.13);
+  border-color: rgba(37, 99, 235, 0.38);
+}
+
+.seas-chip--5 {
+  background-color: rgba(37, 99, 235, 0.06);
+  border-color: rgba(37, 99, 235, 0.20);
+  color: var(--blockr-blue-600, #2563eb);
+}
+
+.seas-chip--10 {
+  background-color: rgba(128, 128, 135, 0.10);
+  border-color: rgba(128, 128, 135, 0.28);
+  color: var(--blockr-color-text-muted, #6b7280);
+}
