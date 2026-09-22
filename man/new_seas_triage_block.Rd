@@ -38,8 +38,10 @@ for each series, whether seasonality survives in the adjusted series, and
 how far each adjustment is from a reference you already trust.
 }
 \details{
-Variadic, in order: the first input is the list of models from
-\code{\link[=new_seas_block]{new_seas_block()}}, the optional second is a long data frame holding
+Variadic, in order: the first input is the \code{seas_multi} that
+\code{\link[=new_seas_block]{new_seas_block()}} returns when its input holds several series -- \code{seas()}
+takes an \code{mts} and answers with one model per column -- and the optional
+second is a long data frame holding
 the adjustment to compare against, typically the statistical office's own
 published series.
 

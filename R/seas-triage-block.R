@@ -4,8 +4,10 @@
 #' for each series, whether seasonality survives in the adjusted series, and
 #' how far each adjustment is from a reference you already trust.
 #'
-#' Variadic, in order: the first input is the list of models from
-#' [new_seas_block()], the optional second is a long data frame holding
+#' Variadic, in order: the first input is the `seas_multi` that
+#' [new_seas_block()] returns when its input holds several series -- `seas()`
+#' takes an `mts` and answers with one model per column -- and the optional
+#' second is a long data frame holding
 #' the adjustment to compare against, typically the statistical office's own
 #' published series.
 #'

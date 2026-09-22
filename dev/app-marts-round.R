@@ -7,7 +7,11 @@
 # So the board can adjust all 21 itself and check each against the office's
 # published answer, which is what the triage table's last two columns are.
 #
-# Nothing is preloaded. The first block downloads the publisher's zip.
+# Nothing is preloaded. The first block downloads the publisher's zip, so this
+# app cannot run in the dev container, which has no network. The repoint off
+# `new_seas_multi_block()` is therefore unverified in the browser; what is
+# verified is that `seas_triage()` reads a `seas_multi` straight from the
+# plain seas block.
 for (p in c("blockr.core", "blockr.dag", "blockr.dock", "blockr.dplyr",
             "blockr.extra", "blockr.io", "blockr.seasonal")) {
   pkgload::load_all(file.path("/workspace", p), quiet = TRUE)
@@ -118,10 +122,17 @@ board <- blockr.dock::new_dock_board(
     ),
 
     # The round. One specification, 21 series, about ten seconds.
-    round = new_seas_multi_block(
-      series = "cat_code", time = "time", value = "val",
-      block_name = "Adjust all 21"
+    #
+    # THE PLAIN SEAS BLOCK DOES THE ROUND. `new_seas_multi_block()` used to
+    # sit here and take the three column names; it is gone, because
+    # `seas()` takes an `mts` and answers with a `seas_multi`, and the block
+    # already writes `seasonal::seas(x = tsbox::ts_ts(data))`. What the
+    # column names bought is bought instead by handing tsbox three columns
+    # and nothing else, which is the select below.
+    keep = blockr.dplyr::new_select_block(
+      columns = c("cat_code", "time", "val"), block_name = "Three columns"
     ),
+    round = new_seas_block(block_name = "Adjust all 21"),
 
     # The product. Sorted worst first.
     # `ref_cols` is not optional here and the panel shows why: the reference
@@ -134,8 +145,8 @@ board <- blockr.dock::new_dock_board(
     )
   ),
   links = blockr.core::links(
-    from = c("file", "marts", "marts", "nsa", "round", "sa"),
-    to   = c("marts", "nsa", "sa", "round", "triage", "triage")
+    from = c("file", "marts", "marts", "nsa", "keep", "round", "sa"),
+    to   = c("marts", "nsa", "sa", "keep", "round", "triage", "triage")
   ),
   extensions = list(blockr.dag::new_dag_extension())
 )
