@@ -29,6 +29,23 @@ seas_args_ui <- function(id) {
       class = "block-container",
       shiny::div(id = shiny::NS(id, "seas_input"), class = "seas-args"),
 
+      # THE CLIENT ASKS; THE SERVER DOES NOT PUSH BLIND. The catalogue used
+      # to go out in a bare `observe()` at module start, which is before this
+      # div is on the page whenever the block's server runs ahead of its
+      # markup -- a dock panel that is not on the startup view, a block
+      # evaluated because something downstream needs it. Shiny drops a custom
+      # message whose handler has not registered, nothing re-sends, and the
+      # argument band stays empty for the life of the session while the
+      # expression below it renders fine.
+      #
+      # This script ships WITH the container, so it cannot run before it
+      # exists. It waits for Shiny rather than for a document event, because
+      # a late-mounted panel arrives long after both.
+      shiny::tags$script(shiny::HTML(sprintf(
+        "(function(){var f=function(){if(window.Shiny&&Shiny.setInputValue){Shiny.setInputValue('%s', Date.now(), {priority:'event'});}else{setTimeout(f,50);}};f();})();",
+        shiny::NS(id, "seas_ready")
+      ))),
+
       # THE EXPRESSION, BETWEEN WHAT YOU SET AND WHAT CAME OUT. Its own band
       # rather than another row, because it is not an input: the arguments
       # above write it and core runs it, and putting it among them would make
@@ -74,8 +91,10 @@ seas_args_server <- function(input, session, args,
   self_write <- new.env(parent = emptyenv())
   self_write$active <- FALSE
 
-  # The catalog is 285 entries and never changes, so it goes once, on mount.
-  shiny::observe({
+  # The catalog is 285 entries and never changes, so it goes once -- but on
+  # the CLIENT's word, not at module start. See the script in `seas_args_ui()`
+  # for why the push cannot be blind.
+  shiny::observeEvent(input$seas_ready, {
     session$sendCustomMessage("seas-args-init", list(
       id = id,
       catalog = get_x13_catalog(),
