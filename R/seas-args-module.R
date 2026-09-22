@@ -85,11 +85,17 @@ seas_args_server <- function(input, session, args,
 
   r_args <- shiny::reactiveVal(seas_rows(args))
 
-  # Guards the R -> client push while R is handling a client message: the
-  # client has already drawn its own edit, and re-rendering underneath a menu
-  # the user still has open would close it.
-  self_write <- new.env(parent = emptyenv())
-  self_write$active <- FALSE
+  # WHAT THE CLIENT ALREADY HAS, so R does not send it back. Every edit goes
+  # client -> R, and the observer below would return it unchanged: the client
+  # re-renders, the control the user is typing in is destroyed, and the next
+  # keystroke lands nowhere. A Backspace removes one tag and the second does
+  # nothing, which is how this was found.
+  #
+  # A flag set and cleared inside the input observer does not work: the push
+  # observer runs after it, in the same flush, by which time the flag is down.
+  # Comparing is the only thing that holds across the flush.
+  seen <- new.env(parent = emptyenv())
+  seen$rows <- seas_rows(args)
 
   # The catalog is 285 entries and never changes, so it goes once -- but on
   # the CLIENT's word, not at module start. See the script in `seas_args_ui()`
@@ -105,18 +111,21 @@ seas_args_server <- function(input, session, args,
   }, priority = 100)
 
   shiny::observeEvent(input$seas_input, {
-    self_write$active <- TRUE
-    r_args(seas_rows(input$seas_input$args))
-    self_write$active <- FALSE
+    rows <- seas_rows(input$seas_input$args)
+    seen$rows <- rows
+    r_args(rows)
   })
 
+  # Anything that writes the rows from the R side -- a restored board, another
+  # block through external_ctrl -- redraws the client. An edit the client made
+  # itself does not.
   shiny::observeEvent(r_args(), {
-    if (self_write$active) {
+    rows <- seas_rows(r_args())
+    if (identical(rows, seen$rows)) {
       return()
     }
-    session$sendCustomMessage("seas-args-update", list(
-      id = id, args = seas_rows(r_args())
-    ))
+    seen$rows <- rows
+    session$sendCustomMessage("seas-args-update", list(id = id, args = rows))
   }, ignoreNULL = FALSE)
 
   r_args
