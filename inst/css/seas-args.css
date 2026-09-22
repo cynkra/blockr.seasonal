@@ -52,12 +52,6 @@
   color: var(--blockr-color-text-secondary, #374151);
 }
 
-.seas-empty {
-  font-size: var(--blockr-font-size-sm, 0.8125rem);
-  color: var(--blockr-color-text-subtle, #9ca3af);
-  padding: 8px 0 4px;
-}
-
 /* The sentence. Ordinary prose, and the only clickable words are
    seasonal.website's own option labels. */
 .seas-try {
@@ -82,8 +76,35 @@
   text-decoration: underline;
 }
 
+/* The add bar, blockr.dplyr's: a muted link with a plus that turns primary on
+   hover. Deliberately NOT a bordered control -- as a field the same height as
+   every value control, it read as one more argument. */
 .seas-add {
   margin-top: 10px;
+}
+
+.seas-add__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  transition: color 0.15s ease;
+}
+
+.seas-add__link:hover {
+  color: var(--blockr-color-primary, #2563eb);
+}
+
+.seas-add__icon {
+  display: inline-flex;
+  align-items: center;
 }
 
 .seas-text {
@@ -134,4 +155,147 @@
   padding: 0;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+/* The line. A console rather than a menu: the completion is inside the input
+   as selected text, so there is no second layer to align -- a <div> under an
+   <input> draws the same string twice a sub-pixel apart, because the browser
+   lays an input's text out in its own internal box. */
+.seas-line__box {
+  position: relative;
+}
+
+.seas-line__input {
+  width: 100%;
+  height: var(--blockr-control-h, 42px);
+  box-sizing: border-box;
+  font-family: var(--blockr-font-mono, 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace);
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  padding: 0 34px 0 11px;
+  color: var(--blockr-color-text-primary, #111827);
+  background: var(--blockr-color-bg-input, #f9fafb);
+  border: 1px solid var(--blockr-color-border, #e5e7eb);
+  border-radius: var(--blockr-radius-lg, 8px);
+}
+
+.seas-line__input::placeholder {
+  color: var(--blockr-color-text-subtle, #9ca3af);
+}
+
+.seas-line__input:focus {
+  outline: none;
+  border-color: var(--blockr-color-primary, #2563eb);
+  box-shadow: var(--blockr-focus-ring, 0 0 0 3px rgba(37, 99, 235, 0.12));
+}
+
+/* The keystroke, the house way: compact contexts get the bare glyph, muted.
+   blockr.docs/design-system/ux-principles.md. */
+.seas-line__chip {
+  position: absolute;
+  right: 11px;
+  top: 0;
+  height: var(--blockr-control-h, 42px);
+  display: flex;
+  align-items: center;
+  font-size: 0.95em;
+  opacity: 0.55;
+  color: var(--blockr-color-primary, #2563eb);
+  pointer-events: none;
+}
+
+.seas-line__hint {
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  margin: 6px 0 0;
+}
+
+.seas-line__list {
+  margin-top: 8px;
+  background: #fff;
+  border: 1px solid var(--blockr-color-border, #e5e7eb);
+  border-radius: var(--blockr-radius-lg, 8px);
+  max-height: 232px;
+  overflow-y: auto;
+}
+
+.seas-line__list:empty {
+  display: none;
+}
+
+.seas-line__opt {
+  display: grid;
+  grid-template-columns: 190px 1fr 16px;
+  gap: 12px;
+  align-items: baseline;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.seas-line__opt.is-on {
+  background: var(--blockr-color-primary-bg, #eff6ff);
+}
+
+.seas-line__opt:hover {
+  background: var(--blockr-color-bg-hover, #f3f4f6);
+}
+
+.seas-line__opt code {
+  font-family: var(--blockr-font-mono, 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace);
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-text-primary, #111827);
+  background: none;
+  padding: 0;
+}
+
+.seas-line__opt span {
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seas-line__kbd {
+  font-size: 0.95em;
+  opacity: 0.55;
+  color: var(--blockr-color-primary, #2563eb);
+  text-align: right;
+}
+
+/* What finishes the argument sits UNDER the list, not in it: the list holds
+   values X-13 takes, and this is not one. Shift+Enter is its key, so Enter
+   keeps its single meaning inside the list. */
+.seas-line__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 12px;
+  margin-top: -1px;
+  cursor: pointer;
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  color: var(--blockr-color-text-secondary, #374151);
+  background: var(--blockr-color-bg-subtle, #f9fafb);
+  border: 1px solid var(--blockr-color-border, #e5e7eb);
+  border-radius: 0 0 var(--blockr-radius-lg, 8px) var(--blockr-radius-lg, 8px);
+}
+
+.seas-line__foot:hover {
+  background: var(--blockr-color-bg-hover, #f3f4f6);
+}
+
+.seas-line__foot.is-off {
+  display: none;
+}
+
+/* Nothing matches what was typed, so the list is hidden and the footer is on
+   its own. */
+.seas-line__foot.is-solo {
+  margin-top: 8px;
+  border-radius: var(--blockr-radius-lg, 8px);
+}
+
+.seas-line__list.has-foot {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
