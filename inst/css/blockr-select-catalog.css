@@ -1,0 +1,567 @@
+/* =========================================================================
+   BlockrSelect — custom select component
+   BEM naming, uses --blockr-* design tokens with fallbacks
+   ========================================================================= */
+
+/* --- Base container --- */
+.blockr-select {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  font-size: var(--blockr-font-size-base, 0.875rem);
+  font-family: inherit;
+  line-height: 1.4;
+  color: var(--blockr-color-text-primary, #111827);
+}
+
+.blockr-select *,
+.blockr-select *::before,
+.blockr-select *::after {
+  box-sizing: border-box;
+}
+
+/* --- Control (clickable area) --- */
+.blockr-select__control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 3px;
+  min-height: 30px;
+  padding: 0 6px;
+  cursor: pointer;
+  /* Transparent by default — inherits container styling */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+/* Bordered modifier — for standalone use outside row containers.
+   Matches blockr.dock's .selectize-input / .form-control sizing. */
+.blockr-select--bordered .blockr-select__control {
+  background-color: var(--blockr-color-bg-input, #f9fafb);
+  border: 1px solid var(--blockr-color-border, #e5e7eb);
+  border-radius: 8px;
+  padding: 6px 12px;
+  min-height: 42px;
+}
+
+.blockr-select--bordered.blockr-select--open .blockr-select__control,
+.blockr-select--bordered .blockr-select__control:focus-within {
+  border-color: var(--blockr-color-primary, #2563eb);
+  box-shadow: var(--blockr-focus-ring, 0 0 0 3px rgba(37, 99, 235, 0.12));
+}
+
+/* --- Value display (single mode) --- */
+.blockr-select__value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.blockr-select__value--placeholder {
+  color: var(--blockr-grey-400, #9ca3af);
+}
+
+/* Hide value when dropdown is open (single mode) */
+.blockr-select--open .blockr-select__value {
+  display: none;
+}
+
+/* --- Arrow (single mode) --- */
+.blockr-select__arrow {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--blockr-grey-400, #9ca3af);
+  transition: transform 150ms ease;
+  pointer-events: none;
+}
+
+.blockr-select--open .blockr-select__arrow {
+  transform: rotate(180deg);
+}
+
+/* --- Search input --- */
+.blockr-select__search {
+  flex: 1;
+  min-width: 40px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.blockr-select__search::placeholder {
+  color: var(--blockr-grey-400, #9ca3af);
+}
+
+
+/* In single mode when closed, collapse the search input */
+.blockr-select--single:not(.blockr-select--open) .blockr-select__search {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  opacity: 0;
+  position: absolute;
+}
+
+/* In multi mode when closed, take the search input out of flow as well.
+   Left in flow it holds a trailing flex slot (min-width) plus one `gap`
+   gutter, so once the tags leave less than that free, the empty input alone
+   wraps to a second row and inflates the control even though the tags fit on
+   one. Zeroing its width is not enough — the gutter still counts — hence
+   position: absolute, matching the single-mode rule above.
+   Gated on a tag existing: while nothing is selected this input is the ONLY
+   element that renders the placeholder (multi mode builds no
+   `.blockr-select__value`), so collapsing it when empty blanks the control. */
+.blockr-select--multi:not(.blockr-select--open)
+  .blockr-select__tags:has(.blockr-select__tag) .blockr-select__search {
+  position: absolute;
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  opacity: 0;
+}
+
+/* --- Tags container (multi mode) --- */
+.blockr-select__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+  /* As a flex item of the control, min-width: auto would content-size this
+     past the control, defeating the tags' max-width: 100% cap below. */
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* --- Single-line modifier ---------------------------------------------------
+   Tags stay on one row and the overflow collapses into a "+N" chip
+   (blockr-select.js `fitTags`), so the control keeps its height whatever is
+   selected. Used by the auto-generated parameter bands, where a wrapping
+   select sets the height of the whole grid row. */
+.blockr-select--single-line .blockr-select__control {
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.blockr-select--single-line .blockr-select__tags {
+  flex-wrap: nowrap;
+  overflow: hidden;
+  flex: 1;
+}
+.blockr-select--single-line .blockr-select__tag {
+  flex: 0 0 auto;
+}
+/* Clicking the chip wraps the control open so every tag is reachable — the
+   dropdown lists only what is not selected, so this is the only place a
+   hidden pick can be removed. Collapses again on the next outside click. */
+.blockr-select--single-line.blockr-select--expanded .blockr-select__control,
+.blockr-select--single-line.blockr-select--expanded .blockr-select__tags {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+/* The overflow count. Not a tag: it carries no remove button, and clicking it
+   expands the control (see the modifier above) rather than opening the
+   dropdown. */
+.blockr-select__more {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  /* --blockr-radius-sm */
+  border-radius: 4px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  line-height: 1.4;
+  color: var(--blockr-color-primary, #2563eb);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* --- Individual tag --- */
+.blockr-select__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 4px 1px 7px;
+  background: var(--blockr-grey-100, #f3f4f6);
+  border: 1px solid var(--blockr-grey-200, #e5e7eb);
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--blockr-grey-700, #374151);
+  cursor: default;
+  user-select: none;
+  /* Cap at the control width, not a fixed size: a tag only ellipsizes when
+     it alone cannot fit the row, so widening the block removes truncation. */
+  max-width: 100%;
+}
+
+.blockr-select__tag-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tag remove button */
+.blockr-select__tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--blockr-grey-400, #9ca3af);
+  cursor: pointer;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.blockr-select__tag-remove:hover {
+  color: var(--blockr-color-danger, #dc2626);
+  background: rgba(220, 53, 69, 0.08);
+}
+
+/* Tags the single-line fit dropped. After `.blockr-select__tag`, whose
+   `display: inline-flex` would otherwise win on source order. */
+.blockr-select__tag--hidden {
+  display: none;
+}
+
+/* --- Drag states --- */
+.blockr-select__tag[draggable="true"] {
+  cursor: grab;
+}
+
+.blockr-select__tag--dragging {
+  opacity: 0.4;
+}
+
+/* Drop indicator: a centered vertical bar between tags */
+.blockr-select__tag {
+  position: relative;
+}
+
+.blockr-select__tag--drop-before {
+  margin-left: 8px;
+}
+
+.blockr-select__tag--drop-before::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--blockr-color-primary, #2563eb);
+  border-radius: 1px;
+}
+
+.blockr-select__tag--drop-after {
+  margin-right: 8px;
+}
+
+.blockr-select__tag--drop-after::after {
+  content: "";
+  position: absolute;
+  right: -6px;
+  top: 2px;
+  bottom: 2px;
+  width: 2px;
+  background: var(--blockr-color-primary, #2563eb);
+  border-radius: 1px;
+}
+
+/* --- Dropdown --- */
+.blockr-select__dropdown {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--blockr-color-border, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+}
+
+/* ===== Headless: the dropdown as a menu ===== */
+/* Blockr.Select.menu(): the same dropdown, hung off a word instead of a
+   control it owns. The host is a stub -- the panel itself is portalled to
+   <body> like every other dropdown. blockr.docs design-system/pinned-controls.md */
+.blockr-select-menu-host {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.blockr-select--headless .blockr-select__dropdown {
+  padding: 4px;
+}
+
+/* The role this menu sets. The word that was clicked says which VALUE is in
+   the slot, never which setting it fills, so the panel has to. */
+.blockr-select__menu-title {
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--blockr-color-text-subtle, #9ca3af);
+  padding: 4px 9px 4px;
+}
+
+/* Inset by the panel's own padding again, so the box sits inside the panel
+   rather than against its edge and its border lines up with where the option
+   text starts. */
+.blockr-select__search--menu {
+  display: block;
+  width: calc(100% - 8px);
+  height: 30px;
+  margin: 2px 4px 5px;
+  padding: 0 9px;
+  border: 1px solid var(--blockr-color-border-strong, #d1d5db);
+  border-radius: var(--blockr-radius-sm, 4px);
+  background: #fff;
+  font: inherit;
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+}
+
+/* A short list needs no filter box, but it still needs the focus: the arrows,
+   Enter and type-ahead all run off this input. Clipped rather than hidden,
+   because display:none cannot hold focus. */
+.blockr-select__search--offscreen {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.blockr-select--open .blockr-select__dropdown {
+  display: block;
+}
+
+/* Open above */
+.blockr-select--above .blockr-select__dropdown {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+/* --- Options --- */
+.blockr-select__option {
+  padding: 6px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.blockr-select__option--highlighted {
+  background: var(--blockr-grey-50, #f9fafb);
+}
+
+.blockr-select__option--selected {
+  font-weight: 600;
+}
+
+.blockr-select__option:hover {
+  background: var(--blockr-grey-50, #f9fafb);
+}
+
+/* --- Option label (muted description next to value) ---
+   Appears in both dropdown options and the selected-value display.
+   Truncation is handled by the parent via white-space: nowrap + overflow +
+   text-overflow: ellipsis. The inline label sits after the value, so the
+   parent ellipsizes the label first when space runs out. */
+.blockr-select__opt-label {
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-grey-500, #6b7280);
+  margin-left: 8px;
+  font-weight: 400;
+}
+
+/* --- Empty state --- */
+.blockr-select__empty {
+  padding: 8px 10px;
+  color: var(--blockr-grey-400, #9ca3af);
+  font-style: italic;
+  text-align: center;
+}
+
+/* ===========================================================================
+   SelectLong additions: groups, descriptions, the rail.
+   Everything above is blockr-select.css unchanged.
+   ========================================================================= */
+
+/* --- group heading, in the result flow ----------------------------------- */
+.blockr-select__group {
+  font-size: 11px;
+  font-weight: var(--blockr-font-weight-medium, 500);
+  color: var(--blockr-grey-400, #9ca3af);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 9px 10px 3px;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+.blockr-select__group:first-child { padding-top: 4px; }
+
+/* --- two-line option ------------------------------------------------------
+   The description is the reason this control exists: a list of four-character
+   X-13 codes is unusable without it. It gets its own line rather than a
+   trailing slot, where at a dock panel's width it would ellipsize to four
+   words. */
+.blockr-select__option--two-line {
+  display: block;
+  padding: 6px 10px;
+  line-height: 1.35;
+}
+.blockr-select__opt-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.blockr-select__opt-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+}
+.blockr-select__option--two-line .blockr-select__opt-label {
+  margin-left: 0;
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+.blockr-select__opt-desc {
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  color: var(--blockr-color-text-muted, #6b7280);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- the two panes -------------------------------------------------------- */
+/* The dropdown hands its scrolling to the panes. Without this there are three
+   nested scroll containers, the outermost one wins, and dragging the results
+   drags the rail with them. */
+.blockr-select__dropdown--panes {
+  max-height: none;
+  overflow: hidden;
+}
+.blockr-select__panes {
+  display: grid;
+  grid-template-columns: 148px 1fr;
+  gap: 10px;
+}
+.blockr-select__rail {
+  max-height: 360px;
+  overflow-y: auto;
+  border-right: 1px solid var(--blockr-color-border, #e5e7eb);
+  padding-right: 6px;
+}
+.blockr-select__results {
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+/* --- a rail row ----------------------------------------------------------- */
+/* SANS, NOT MONO. The finder sets its rail in mono and is right to: there the
+   rows are X-13 spec names, literal identifiers you type into an argument
+   path. Here they are category labels out of a catalogue, and in the next
+   caller they will be something else again. Mono would be saying "this is
+   code" about words that are not. The count keeps tabular figures, which is
+   the one thing in the row that is a number. */
+.blockr-select__spec {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-text-muted, #6b7280);
+  padding: 5px 8px;
+  border-radius: var(--blockr-radius-md, 6px);
+}
+.blockr-select__spec span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.blockr-select__spec:hover { background: var(--blockr-color-bg-hover, #f3f4f6); }
+.blockr-select__spec.is-on {
+  background: var(--blockr-color-primary-bg, #eff6ff);
+  color: var(--blockr-color-text-primary, #111827);
+}
+/* A group with no matches DIMS. Removing it makes the rail reorder under the
+   pointer while you are still typing, which is the one thing a facet must
+   never do. */
+.blockr-select__spec.is-dim { opacity: 0.35; }
+.blockr-select__spec-count {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  color: var(--blockr-grey-400, #9ca3af);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- disabled: present, not pickable -------------------------------------
+   Leaving the option out would be simpler and would leave the reader
+   wondering whether they mistyped. It stays, dimmed, and its `label` says
+   why it cannot be chosen. */
+.blockr-select__option--disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.blockr-select__option--disabled:hover {
+  background: none;
+}
+
+/* --- create: committing a value that is not in the list ------------------- */
+.blockr-select__create {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  border-top: 1px solid var(--blockr-color-border, #e5e7eb);
+  margin-top: 4px;
+}
+.blockr-select__create-lead {
+  font-size: var(--blockr-font-size-xs, 0.75rem);
+  color: var(--blockr-color-text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.blockr-select__create-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--blockr-font-size-sm, 0.8125rem);
+  color: var(--blockr-color-text-primary, #111827);
+}
