@@ -1,10 +1,10 @@
 # Seasonal adjustment dashboard -- the whole block set on one board.
 #
-#   ts dataset -> seas -> { series, udg }
+#   ts dataset -> seas -> series
 #
 # The seas block returns a `seas` MODEL, not data. Everything downstream reads
 # that one fit, so changing the specification in the argument builder moves
-# both views at once.
+# both the fit's own card and the series below it.
 #
 #   Rscript blockr.seasonal/dev/app-dashboard.R
 pkgload::load_all("/workspace/blockr.core", quiet = TRUE)
@@ -19,12 +19,11 @@ board <- blockr.dock::new_dock_board(
   blocks = c(
     data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
     seas = new_seas_block(),
-    series = new_seas_series_block(series = c("original", "final")),
-    udg = new_udg_block()
+    series = new_seas_series_block(series = c("original", "final"))
   ),
   links = blockr.core::links(
-    from = c("data", "seas", "seas"),
-    to   = c("seas", "series", "udg")
+    from = c("data", "seas"),
+    to   = c("seas", "series")
   ),
   extensions = list(blockr.dag::new_dag_extension())
 )

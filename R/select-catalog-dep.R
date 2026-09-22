@@ -69,8 +69,9 @@ blockr_select_catalog_dep <- function() {
 
 #' The seas block's argument rows
 #'
-#' The control surface built on [blockr_select_catalog_dep()]: the six common
-#' questions, the argument rows under them and the finder that adds one.
+#' The control surface built on `blockr_select_catalog_dep()`: one row per
+#' argument, the sentence of suggestions under them, and the console line that
+#' adds one.
 #' @noRd
 seas_args_dep <- function() {
   htmltools::tagList(

@@ -7,5 +7,10 @@
 register_seasonal_blocks()
 }
 \description{
-Register all seasonal adjustment blocks with the blockr registry
+Three entries, where there were six. The seas block returns the fitted
+model and reads itself through \code{ts_model_view()}, so the blocks that
+existed to render a fit -- an HTML summary, a picker over \code{udg()}'s 348
+statistics, the five candidate models -- were answering a question the
+block now answers about itself. What is left is one block per SHAPE: fit a
+model, take series out of a fit, put many fits in a table.
 }

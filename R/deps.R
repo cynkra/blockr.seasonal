@@ -49,17 +49,3 @@ blockr_select_dep <- function() {
   )
 }
 
-#' Rich select component dependency (searchable select with descriptions)
-#' Reusable — extract to blockr.core when needed
-#' Seas summary CSS dependency
-#' @noRd
-seas_summary_css_dep <- function() {
-  htmltools::htmlDependency(
-    name = "seas-summary-css",
-    version = seas_asset_version(),
-    src = system.file("css", package = "blockr.seasonal"),
-    stylesheet = "seas-summary.css"
-  )
-}
-
-#' Seas block JS + CSS dependency
