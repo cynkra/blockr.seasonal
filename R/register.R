@@ -22,7 +22,7 @@ register_seasonal_blocks <- function() {
     ),
     description = c(
       "Perform seasonal adjustment using X-13ARIMA-SEATS",
-      "One series out of a fitted X-13 model: 217 codes, searched by description",
+      "One series out of a fitted X-13 model: 212 codes, searched by description",
       "One sorted row per series: model, diagnostics, and distance from a reference"
     ),
     category = c(

@@ -8,7 +8,7 @@
 #' the `?series` table in the seasonal package by
 #' `inst/scripts/update-series-data.R`, so the codes, their descriptions and
 #' the spec they belong to all come from the X-13 manual rather than from a
-#' list maintained here. 217 of them survive the two exclusions below.
+#' list maintained here. 212 of them survive the two exclusions below.
 #'
 #' THE DESCRIPTION IS THE LABEL AND THE CODE IS THE SMALL PART. Choosing from
 #' `a10`, `dor`, `ao` is choosing from nothing; the row reads "regARIMA
@@ -174,12 +174,16 @@ seas_series_catalog <- local({
       return(cache)
     }
     f <- system.file("extdata", "series_codes.rds", package = "blockr.seasonal")
-    d <- if (nzchar(f) && file.exists(f)) {
-      as.data.frame(readRDS(f), stringsAsFactors = FALSE)
-    } else {
-      data.frame(spec = character(), short_name = character(),
-                 description = character(), stringsAsFactors = FALSE)
+    # NO FALLBACK. An empty catalogue here is a block that offers no series
+    # and says nothing about why, which reads as a model with nothing in it.
+    # The file ships with the package; if it is not there the install is
+    # broken and should say so.
+    if (!nzchar(f) || !file.exists(f)) {
+      stop("series_codes.rds is missing from blockr.seasonal's extdata. ",
+           "The install is incomplete: the series picker has no catalogue.",
+           call. = FALSE)
     }
+    d <- as.data.frame(readRDS(f), stringsAsFactors = FALSE)
     d <- d[!d$spec %in% c("Composite", "X11regression"), , drop = FALSE]
     d <- d[!d$short_name %in% c("acm", "rcm", "rts", "iac", "ipc"), , drop = FALSE]
     out <- data.frame(

@@ -21,7 +21,7 @@ THE CATALOGUE IS THE BLOCK. \code{inst/extdata/series_codes.rds} is scraped from
 the \code{?series} table in the seasonal package by
 \code{inst/scripts/update-series-data.R}, so the codes, their descriptions and
 the spec they belong to all come from the X-13 manual rather than from a
-list maintained here. 217 of them survive the two exclusions below.
+list maintained here. 212 of them survive the two exclusions below.
 
 THE DESCRIPTION IS THE LABEL AND THE CODE IS THE SMALL PART. Choosing from
 \code{a10}, \code{dor}, \code{ao} is choosing from nothing; the row reads "regARIMA

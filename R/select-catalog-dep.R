@@ -17,7 +17,7 @@ seas_asset_version <- function() {
 #' The catalogue select
 #'
 #' `Blockr.SelectCatalog`, for lists that are long, categorised and described:
-#' the 217 X-13 output series, and the 306 X-13 arguments beside them. A
+#' the 212 X-13 output series, and the 285 X-13 arguments beside them. A
 #' searchable single- or multi-select whose options carry a `group` and a
 #' `description`, and which grows a facet rail beside the results when the
 #' control is wide enough to spend the space.

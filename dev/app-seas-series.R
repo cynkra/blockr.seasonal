@@ -8,7 +8,7 @@
 #                new_seas_block(), which is in flight in another session.
 #   Seas series  the block, opened on original + adjusted + trend, which is
 #                the seasonal adjustment view and used to be three blocks.
-#                One multi-select over the 217 X-13 codes, description as the
+#                One multi-select over the 212 X-13 codes, description as the
 #                label and the code trailing, grouped by spec, searched over
 #                both. The chart is ts_display's, not one of ours.
 #   X11 model    the same block against an X11 fit, so the list changes: X11
