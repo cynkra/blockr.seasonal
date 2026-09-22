@@ -19,8 +19,7 @@ board <- blockr.dock::new_dock_board(
   blocks = c(
     data = blockr.ts::new_ts_dataset_block(dataset = "AirPassengers"),
     seas = new_seas_block(),
-    explorer = new_series_explorer_block(),
-    final = new_final_block(),
+    series = new_seas_series_block(series = c("original", "final")),
     month = new_monthplot_block(),
     udg = new_udg_block()
   ),
