@@ -11,7 +11,7 @@
 #' Same reason and same shape as `blockr.ts::ts_asset_version()`.
 #' @noRd
 seas_asset_version <- function() {
-  "0.12.1"
+  "0.13.0"
 }
 
 #' The catalogue select
@@ -51,7 +51,9 @@ seas_asset_version <- function() {
 #' @noRd
 blockr_select_catalog_dep <- function() {
   htmltools::tagList(
-    blockr_core_js_dep(),
+    # `Blockr.uid`, `Blockr.escapeHtml`, `Blockr.icons`: blockr.dplyr's, not a
+    # copy of them.
+    blockr.dplyr::blockr_core_js_dep(),
     htmltools::htmlDependency(
       name = "blockr-select-catalog-js",
       version = seas_asset_version(),

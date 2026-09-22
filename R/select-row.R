@@ -32,8 +32,9 @@ select_row_ui <- function(id, fields, msg) {
   })
 
   htmltools::tagList(
-    blockr_core_js_dep(),
-    blockr_select_dep(),
+    # blockr.dplyr OWNS Blockr.Select and the CSS under it. This package
+    # carried a copy for a while and it drifted: 540 lines against 1086.
+    blockr.dplyr::blockr_select_dep(),
     select_row_css(),
     shiny::div(
       class = "blockr-select-row",

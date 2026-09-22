@@ -104,7 +104,7 @@ new_seas_series_block <- function(series = "final", ...) {
     function(id) {
       shiny::tagList(
         blockr_select_catalog_dep(),
-        blockr_blocks_css_dep(),
+        blockr.dplyr::blockr_blocks_css_dep(),
         shiny::div(
           class = "block-container",
           shiny::uiOutput(shiny::NS(id, "pick"))
