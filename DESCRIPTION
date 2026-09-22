@@ -17,12 +17,10 @@ Imports:
     shiny,
     blockr.core (>= 0.0.1),
     blockr.ts,
-    tibble,
     glue,
     seasonal,
     jsonlite,
     htmltools,
-    echarts4r,
     tsbox,
     stats,
     utils

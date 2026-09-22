@@ -51,25 +51,6 @@ blockr_select_dep <- function() {
 
 #' Rich select component dependency (searchable select with descriptions)
 #' Reusable — extract to blockr.core when needed
-#' @noRd
-blockr_select_rich_dep <- function() {
-  htmltools::tagList(
-    blockr_core_js_dep(),
-    htmltools::htmlDependency(
-      name = "blockr-select-rich-js",
-      version = utils::packageVersion("blockr.seasonal"),
-      src = system.file("js", package = "blockr.seasonal"),
-      script = "blockr-select-rich.js"
-    ),
-    htmltools::htmlDependency(
-      name = "blockr-select-rich-css",
-      version = utils::packageVersion("blockr.seasonal"),
-      src = system.file("css", package = "blockr.seasonal"),
-      stylesheet = "blockr-select-rich.css"
-    )
-  )
-}
-
 #' Seas summary CSS dependency
 #' @noRd
 seas_summary_css_dep <- function() {
@@ -82,20 +63,3 @@ seas_summary_css_dep <- function() {
 }
 
 #' Seas block JS + CSS dependency
-#' @noRd
-seas_block_dep <- function() {
-  htmltools::tagList(
-    htmltools::htmlDependency(
-      name = "seas-block-js",
-      version = utils::packageVersion("blockr.seasonal"),
-      src = system.file("js", package = "blockr.seasonal"),
-      script = "seas-block.js"
-    ),
-    htmltools::htmlDependency(
-      name = "seas-block-css",
-      version = utils::packageVersion("blockr.seasonal"),
-      src = system.file("css", package = "blockr.seasonal"),
-      stylesheet = "seas-block.css"
-    )
-  )
-}
