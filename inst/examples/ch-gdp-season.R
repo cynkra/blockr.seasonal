@@ -59,10 +59,10 @@ blockr_pkgs <- c(
   "blockr.ui",
   "blockr.dock",
   "blockr.io",       # the read block, pointed at the dataseries.org API
-  "blockr.dplyr",    # the select that cuts the CSV down to a series
+  "blockr.dplyr",    # not used by a block here; the browser should offer it
   "blockr.ts",       # pick, transform, combine
   "blockr.ggplot",   # the figures the report carries
-  "blockr.seasonal", # seas, final, summary, monthplot
+  "blockr.seasonal", # the X-13 block and the series extractor
   "blockr.outline",  # the outline and the report builder
   "blockr.assistant"
 )
