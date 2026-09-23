@@ -2,7 +2,6 @@
 ^\.Rproj\.user$
 ^\.github$
 ^README\.Rmd$
-^inst/examples$
 ^inst/scripts$
 ^\.git$
 ^\.gitignore$
