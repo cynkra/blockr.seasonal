@@ -113,6 +113,9 @@ new_seas_series_block <- function(series = "final", ...) {
     },
     dat_val = function(data) seas_series_validate(data),
     class = "seas_series_block",
+    # See `seas_series_call()`: the expression carries `.(data)` so the
+    # exported chunk names the block it reads from.
+    expr_type = "bquoted",
     ...
   )
 }
@@ -353,6 +356,18 @@ seas_series_call <- function(code, method = "seats") {
 
   code <- as.character(code)
 
+  # `.(data)`, not `data`. The block declares `expr_type = "bquoted"`, so
+  # blockr.core substitutes the upstream block's own name into the
+  # placeholder. With a bare symbol core has to bind it instead, and the
+  # exported report carries
+  #
+  #   ours <- with(list(data = x13), blockr.ts::ts_name(seasonal::final(data),
+  #                                                     "final"))
+  #
+  # where it should read `ours <- blockr.ts::ts_name(seasonal::final(x13),
+  # "final")`. Correct either way; only one of them is code anybody writes.
+  dat <- call(".", as.name("data"))
+
   # ONE PICK KEEPS THE CALL A READER WOULD HAVE WRITTEN. `seasonal::final(
   # data)` is the common case and it should look like itself. Several picks
   # need the fetch-and-combine that seas_series() does, and there is no
@@ -361,7 +376,7 @@ seas_series_call <- function(code, method = "seats") {
     if (code %in% c("final", "original", "trend", "irregular")) {
       return(as.call(list(
         call("::", quote(blockr.ts), quote(ts_name)),
-        as.call(list(call("::", quote(seasonal), as.name(code)), quote(data))),
+        as.call(list(call("::", quote(seasonal), as.name(code)), dat)),
         code
       )))
     }
@@ -369,7 +384,7 @@ seas_series_call <- function(code, method = "seats") {
       tbl <- if (identical(method, "x11")) "d10" else "s10"
       return(as.call(list(
         call("::", quote(blockr.ts), quote(ts_name)),
-        as.call(list(call("::", quote(seasonal), quote(series)), quote(data), tbl)),
+        as.call(list(call("::", quote(seasonal), quote(series)), dat, tbl)),
         "seasonal"
       )))
     }
@@ -377,7 +392,7 @@ seas_series_call <- function(code, method = "seats") {
 
   as.call(list(
     call("::", quote(blockr.seasonal), quote(seas_series)),
-    quote(data),
+    dat,
     if (length(code) == 1L) code else as.call(c(list(quote(c)), as.list(code)))
   ))
 }
