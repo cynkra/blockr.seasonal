@@ -64,7 +64,8 @@ blockr_pkgs <- c(
   "blockr.ggplot",   # the figures the report carries
   "blockr.seasonal", # the X-13 block and the series extractor
   "blockr.outline",  # the outline and the report builder
-  "blockr.assistant"
+  "blockr.assistant",
+  "blockr.session"   # the navbar: workflow name, save and load
 )
 
 for (pkg in blockr_pkgs) {
@@ -344,5 +345,6 @@ board <- new_dock_board(
 
 port <- if (exists("blockr_port")) blockr_port() else 3838L
 message("http://localhost:", port)
-shiny::runApp(serve(board), port = port, host = "0.0.0.0",
+shiny::runApp(serve(board, plugins = custom_plugins(manage_project())),
+              port = port, host = "0.0.0.0",
               launch.browser = FALSE)
